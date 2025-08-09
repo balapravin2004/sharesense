@@ -8,7 +8,7 @@ import "./globals.css";
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen bg-blue-900 rounded-tl-2xl rounded-bl-2xl">
+      <body className="flex min-h-screen transition-all duration-300  sidebar-gradient  rounded-tl-2xl rounded-bl-2xl">
         <Sidebar />
         <div className="flex flex-col flex-grow">
           <Topbar />

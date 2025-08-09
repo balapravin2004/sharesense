@@ -21,7 +21,7 @@ export default function Topbar() {
   }, []);
 
   return (
-    <div className="w-full bg-blue-900 text-white px-4 py-3 flex justify-between items-center sticky top-0 z-[100] shadow-md">
+    <div className="w-full transition-all duration-300  bg-transparent  text-white px-4 py-3 flex justify-between items-center sticky top-0 z-[100] ">
       {/* Logo / Title */}
       <div className="text-xl font-bold tracking-wide">Share Sense</div>
 

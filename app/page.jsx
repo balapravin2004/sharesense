@@ -20,7 +20,7 @@ const Page = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-white p-6 rounded-tl-2xl rounded-bl-2xl">
+    <div className="flex flex-col min-h-screen bg-white p-6 ">
       {/* Page Heading */}
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Home Page</h1>
       <p className="text-lg text-gray-600 mb-10">
@@ -32,7 +32,7 @@ const Page = () => {
         {cards.map((card, index) => (
           <div
             key={index}
-            className={`p-6 rounded-xl shadow-lg bg-gradient-to-r ${card.color} text-white`}>
+            className={`p-6 rounded-xl  bg-gradient-to-r ${card.color} text-white`}>
             <h2 className="text-lg font-medium mb-2">{card.title}</h2>
             <p className="text-3xl font-bold">{card.value}</p>
           </div>
@@ -40,7 +40,7 @@ const Page = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="mt-10 bg-gray-50 p-6 rounded-xl shadow-sm">
+      <div className="mt-10 bg-gray-50 p-6 rounded-xl ">
         <h2 className="text-xl font-semibold mb-4 text-gray-900">
           Recent Activity
         </h2>

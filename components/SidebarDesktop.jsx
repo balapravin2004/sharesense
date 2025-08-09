@@ -32,7 +32,7 @@ export default function SidebarDesktop() {
 
   return (
     <div
-      className={`hidden md:flex h-screen bg-blue-900 text-white shadow-lg p-4 flex-col justify-between transition-all duration-300 rounded-r-3xl ${
+      className={`hidden md:flex h-screen text-white p-4 flex-col justify-between bg-transparent transition-all duration-300 ${
         collapsed ? "w-20" : "w-60"
       }`}>
       <NavList items={navItems} pathname={pathname} collapsed={collapsed} />
