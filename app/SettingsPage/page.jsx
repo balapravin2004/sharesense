@@ -3,20 +3,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 
-/**
- * Settings Page
- * - client-only page
- * - stores settings in localStorage (demo)
- * - replace persistence with real API calls for production
- */
-
 const LS_KEY = "app_settings_v1";
 const LS_TINYMCE_KEY = "tiny_mce_api_key";
 
 function useLocalSettings(defaults) {
   const [state, setState] = useState(() => {
     try {
-      const raw = localStorage.getItem(LS_KEY);
+      const raw = typeof window !== "undefined" && localStorage.getItem(LS_KEY);
       return raw ? JSON.parse(raw) : defaults;
     } catch {
       return defaults;
@@ -25,7 +18,9 @@ function useLocalSettings(defaults) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(LS_KEY, JSON.stringify(state));
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LS_KEY, JSON.stringify(state));
+      }
     } catch (e) {
       console.error("Failed to persist settings", e);
     }
@@ -39,32 +34,19 @@ export default function SettingsPage() {
     profile: {
       name: "Rahul",
       email: "rahul@example.com",
-      avatar: null, // data URL
+      avatar: null,
     },
-    security: {
-      twoFactor: false,
-      // hashed password would be handled server-side in real app
-      passwordSet: true,
-    },
-    notifications: {
-      email: true,
-      push: false,
-    },
-    appearance: {
-      theme: "system", // light | dark | system
-    },
-    ui: {
-      sidebarCollapsedByDefault: false,
-    },
-    secureShare: {
-      defaultExpiryMinutes: 60, // minutes
-      requirePasswordByDefault: true,
-    },
-    rooms: {
-      privateByDefault: false,
-    },
+    security: { twoFactor: false, passwordSet: true },
+    notifications: { email: true, push: false },
+    appearance: { theme: "system" },
+    ui: { sidebarCollapsedByDefault: false },
+    secureShare: { defaultExpiryMinutes: 60, requirePasswordByDefault: true },
+    rooms: { privateByDefault: false },
     editor: {
-      tinyMceApiKey: localStorage.getItem(LS_TINYMCE_KEY) || "",
+      tinyMceApiKey:
+        (typeof window !== "undefined" &&
+          localStorage.getItem(LS_TINYMCE_KEY)) ||
+        "",
     },
   };
 
@@ -72,7 +54,6 @@ export default function SettingsPage() {
   const [avatarFile, setAvatarFile] = useState(null);
   const avatarInputRef = useRef(null);
 
-  // Sessions (demo)
   const [sessions, setSessions] = useState([
     {
       id: "s1",
@@ -88,16 +69,17 @@ export default function SettingsPage() {
     },
   ]);
 
-  // local editor key input state mirrors settings.editor.tinyMceApiKey
   const [editorKeyDraft, setEditorKeyDraft] = useState(
     settings.editor.tinyMceApiKey || ""
   );
 
   useEffect(() => {
     setEditorKeyDraft(settings.editor.tinyMceApiKey || "");
-  }, [settings.editor.tinyMceApiKey]);
+    // sync avatarFile from settings on mount
+    setAvatarFile(settings.profile?.avatar || null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // helpers
   const saveSection = (sectionName, newValues) => {
     setSettings((s) => ({
       ...s,
@@ -134,9 +116,7 @@ export default function SettingsPage() {
     if (!next || next.length < 6)
       return toast.error("New password must be at least 6 characters");
     if (next !== confirm) return toast.error("Passwords do not match");
-    // In real app: call API to change password
     toast.success("Password changed (demo)");
-    // reflect password presence
     setSettings((s) => ({
       ...s,
       security: { ...s.security, passwordSet: true },
@@ -145,7 +125,6 @@ export default function SettingsPage() {
   };
 
   const handleTwoFactorToggle = () => {
-    // In real app: start 2FA enrollment flow
     setSettings((s) => ({
       ...s,
       security: { ...s.security, twoFactor: !s.security.twoFactor },
@@ -195,8 +174,12 @@ export default function SettingsPage() {
 
   const handleEditorSave = (e) => {
     e.preventDefault();
-    // Save tinyMCE key to localStorage and settings.editor (demo)
-    localStorage.setItem(LS_TINYMCE_KEY, editorKeyDraft || "");
+    try {
+      if (typeof window !== "undefined")
+        localStorage.setItem(LS_TINYMCE_KEY, editorKeyDraft || "");
+    } catch (err) {
+      console.error(err);
+    }
     setSettings((s) => ({
       ...s,
       editor: { ...s.editor, tinyMceApiKey: editorKeyDraft || "" },
@@ -215,11 +198,7 @@ export default function SettingsPage() {
   };
 
   const handleExportData = async () => {
-    // build JSON of current settings + demo rooms/files (in real app request from API)
-    const data = {
-      settings,
-      exportedAt: new Date().toISOString(),
-    };
+    const data = { settings, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
@@ -242,15 +221,13 @@ export default function SettingsPage() {
       toast.error("Type DELETE to confirm");
       return;
     }
-    // In real app: call delete endpoint then sign out
-    localStorage.clear();
+    if (typeof window !== "undefined") localStorage.clear();
     toast.success("Account deleted (demo) — local storage cleared");
     setTimeout(() => {
       window.location.href = "/";
     }, 800);
   };
 
-  // small helper to format last active timestamp
   const timeAgo = (ts) => {
     const diff = Math.floor((Date.now() - ts) / 1000);
     if (diff < 60) return `${diff}s ago`;
@@ -260,7 +237,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-4 lg:p-8 min-h-screen bg-gray-50">
+    <div className="p-4 lg:p-8 min-h-screen bg-gray-50 overflow-x-hidden">
       <div className="max-w-6xl mx-auto space-y-6">
         <header className="flex items-center justify-between">
           <div>
@@ -272,14 +249,12 @@ export default function SettingsPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column: profile & security */}
           <div className="space-y-6 lg:col-span-1">
-            {/* Profile */}
-            <section className="bg-white rounded-xl p-4 shadow">
+            <section className="bg-white rounded-xl p-4 shadow overflow-hidden">
               <h2 className="text-lg font-semibold mb-3">Profile</h2>
               <form onSubmit={handleProfileSave} className="space-y-3">
-                <div className="flex gap-3 items-center">
-                  <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
+                <div className="flex gap-3 items-start">
+                  <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {settings.profile.avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -288,10 +263,11 @@ export default function SettingsPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="text-gray-400">No avatar</div>
+                      <div className="text-gray-400 text-xs">No avatar</div>
                     )}
                   </div>
-                  <div className="flex-1">
+
+                  <div className="flex-1 min-w-0">
                     <label className="block text-sm font-medium text-gray-700">
                       Full name
                     </label>
@@ -305,6 +281,7 @@ export default function SettingsPage() {
                         }))
                       }
                     />
+
                     <label className="block text-sm font-medium text-gray-700 mt-2">
                       Email
                     </label>
@@ -318,12 +295,14 @@ export default function SettingsPage() {
                         }))
                       }
                     />
+
                     <div className="flex gap-2 items-center mt-3">
                       <input
                         ref={avatarInputRef}
                         type="file"
                         accept="image/*"
                         onChange={handleAvatarChange}
+                        className="text-sm"
                       />
                       <button
                         type="button"
@@ -354,8 +333,7 @@ export default function SettingsPage() {
               </form>
             </section>
 
-            {/* Security */}
-            <section className="bg-white rounded-xl p-4 shadow">
+            <section className="bg-white rounded-xl p-4 shadow overflow-hidden">
               <h2 className="text-lg font-semibold mb-3">Security</h2>
 
               <div className="space-y-3">
@@ -413,15 +391,13 @@ export default function SettingsPage() {
             </section>
           </div>
 
-          {/* Middle column: preferences (spans 2 on lg) */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Notifications */}
-            <section className="bg-white rounded-xl p-4 shadow">
+            <section className="bg-white rounded-xl p-4 shadow overflow-hidden">
               <h2 className="text-lg font-semibold mb-3">Notifications</h2>
               <form
                 onSubmit={handleNotificationsSave}
                 className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                <label className="flex items-center gap-3">
+                <label className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     name="email"
@@ -444,7 +420,7 @@ export default function SettingsPage() {
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3">
+                <label className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     name="push"
@@ -477,8 +453,7 @@ export default function SettingsPage() {
               </form>
             </section>
 
-            {/* Appearance & UI */}
-            <section className="bg-white rounded-xl p-4 shadow">
+            <section className="bg-white rounded-xl p-4 shadow overflow-hidden">
               <h2 className="text-lg font-semibold mb-3">Appearance & UI</h2>
               <form
                 onSubmit={handleAppearanceSave}
@@ -487,7 +462,7 @@ export default function SettingsPage() {
                   <label className="text-sm font-medium">Theme</label>
                   <select
                     name="theme"
-                    defaultValue={settings.appearance.theme}
+                    value={settings.appearance.theme}
                     onChange={(e) =>
                       setSettings((s) => ({
                         ...s,
@@ -538,8 +513,7 @@ export default function SettingsPage() {
               </form>
             </section>
 
-            {/* Secure Share defaults */}
-            <section className="bg-white rounded-xl p-4 shadow">
+            <section className="bg-white rounded-xl p-4 shadow overflow-hidden">
               <h2 className="text-lg font-semibold mb-3">
                 Secure Share Defaults
               </h2>
@@ -553,10 +527,18 @@ export default function SettingsPage() {
                   <input
                     name="defaultExpiryMinutes"
                     type="number"
-                    defaultValue={settings.secureShare.defaultExpiryMinutes}
+                    value={settings.secureShare.defaultExpiryMinutes}
                     min={1}
+                    onChange={(e) =>
+                      setSettings((s) => ({
+                        ...s,
+                        secureShare: {
+                          ...s.secureShare,
+                          defaultExpiryMinutes: Number(e.target.value) || 1,
+                        },
+                      }))
+                    }
                     className="mt-1 block w-full border border-gray-200 rounded px-3 py-2"
-                    onChange={() => {}}
                   />
                 </div>
 
@@ -569,19 +551,16 @@ export default function SettingsPage() {
                       <input
                         type="checkbox"
                         name="requirePasswordByDefault"
-                        defaultChecked={
-                          settings.secureShare.requirePasswordByDefault
-                        }
-                        onChange={() => {
+                        checked={settings.secureShare.requirePasswordByDefault}
+                        onChange={(e) =>
                           setSettings((s) => ({
                             ...s,
                             secureShare: {
                               ...s.secureShare,
-                              requirePasswordByDefault:
-                                !s.secureShare.requirePasswordByDefault,
+                              requirePasswordByDefault: e.target.checked,
                             },
-                          }));
-                        }}
+                          }))
+                        }
                       />
                       <span className="text-sm">Require password</span>
                     </label>
@@ -598,8 +577,7 @@ export default function SettingsPage() {
               </form>
             </section>
 
-            {/* Rooms defaults */}
-            <section className="bg-white rounded-xl p-4 shadow">
+            <section className="bg-white rounded-xl p-4 shadow overflow-hidden">
               <h2 className="text-lg font-semibold mb-3">Room Defaults</h2>
               <form
                 onSubmit={handleRoomsSave}
@@ -636,8 +614,7 @@ export default function SettingsPage() {
               </form>
             </section>
 
-            {/* Editor settings */}
-            <section className="bg-white rounded-xl p-4 shadow">
+            <section className="bg-white rounded-xl p-4 shadow overflow-hidden">
               <h2 className="text-lg font-semibold mb-3">Editor (TinyMCE)</h2>
               <form
                 onSubmit={handleEditorSave}
@@ -667,8 +644,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Sessions & Export & Delete */}
-        <div className="bg-white rounded-xl p-4 shadow">
+        <div className="bg-white rounded-xl p-4 shadow overflow-hidden">
           <h3 className="text-lg font-semibold mb-3">Sessions & Account</h3>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -683,9 +659,9 @@ export default function SettingsPage() {
                     <div
                       key={s.id}
                       className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <div>
-                        <div className="font-medium">{s.device}</div>
-                        <div className="text-xs text-gray-500">
+                      <div className="min-w-0">
+                        <div className="font-medium truncate">{s.device}</div>
+                        <div className="text-xs text-gray-500 truncate">
                           {s.ip} • {timeAgo(s.lastActive)}
                         </div>
                       </div>
@@ -700,7 +676,7 @@ export default function SettingsPage() {
                   ))
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={handleSignOutAll}
                   className="px-3 py-1 rounded bg-red-50 text-red-600">
@@ -752,14 +728,13 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Delete modal */}
         {deleteModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div
               className="absolute inset-0 bg-black/40"
               onClick={() => setDeleteModalOpen(false)}
             />
-            <div className="relative max-w-lg w-full bg-white rounded-xl shadow-lg p-6 z-10">
+            <div className="relative max-w-lg w-full bg-white rounded-xl shadow-lg p-6 z-10 max-h-[90vh] overflow-auto">
               <h3 className="text-xl font-semibold mb-2 text-red-600">
                 Delete account
               </h3>

@@ -177,13 +177,11 @@ function RoomsList({ rooms, onJoin, onDelete, onCopy }) {
   );
 }
 
-function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
+export function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
   const [message, setMessage] = useState("");
-  const [file, setFile] = useState(null);
   const messagesRef = useRef(null);
 
   useEffect(() => {
-    // scroll to bottom when messages change
     messagesRef.current?.scrollTo({
       top: messagesRef.current.scrollHeight,
       behavior: "smooth",
@@ -192,7 +190,7 @@ function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
 
   if (!room) {
     return (
-      <div className="bg-white rounded-xl p-4 shadow text-center text-gray-500">
+      <div className="bg-white/70 backdrop-blur-md rounded-xl p-6 shadow-lg text-center text-gray-500 border border-gray-200">
         Join a room to chat and share files.
       </div>
     );
@@ -220,16 +218,21 @@ function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
     };
     onUploadFile(room.id, fileMeta);
     e.target.value = null;
-    setFile(null);
   };
 
+  const formatTime = (timestamp) =>
+    new Date(timestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white">
         <div>
           <h3 className="text-lg font-semibold">{room.name}</h3>
-          <p className="text-xs text-gray-500">{room.desc}</p>
+          <p className="text-xs opacity-80">{room.desc}</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -238,12 +241,12 @@ function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
               navigator.clipboard.writeText(url);
               alert("Invite link copied");
             }}
-            className="px-3 py-1 text-xs bg-gray-100 rounded">
-            Copy invite
+            className="px-3 py-1 text-xs bg-white/20 hover:bg-white/30 rounded transition">
+            Copy Invite
           </button>
           <button
-            onClick={() => onLeave()}
-            className="px-3 py-1 text-xs bg-red-50 text-red-600 rounded">
+            onClick={onLeave}
+            className="px-3 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded transition">
             Leave
           </button>
         </div>
@@ -252,7 +255,7 @@ function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
       {/* Chat area */}
       <div
         ref={messagesRef}
-        className="flex-1 overflow-y-auto bg-gray-50 p-3 rounded-lg space-y-3 mb-3"
+        className="flex-1 overflow-y-auto p-6 bg-gray-50 space-y-4"
         style={{ minHeight: 200 }}>
         {room.messages.length === 0 && (
           <div className="text-center text-xs text-gray-400">
@@ -262,20 +265,25 @@ function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
         {room.messages.map((m) => (
           <div
             key={m.id}
-            className={`p-2 rounded ${
-              m.user === "You" ? "bg-blue-50 self-end" : "bg-white"
+            className={`max-w-[75%] p-3 rounded-xl shadow-sm ${
+              m.user === "You"
+                ? "bg-blue-500 text-white ml-auto"
+                : "bg-white border border-gray-200"
             }`}>
-            <div className="text-xs text-gray-500">
+            <div
+              className={`text-xs ${
+                m.user === "You" ? "text-blue-100" : "text-gray-500"
+              }`}>
               {m.user} • {formatTime(m.time)}
             </div>
-            <div className="mt-1 text-sm text-gray-900">{m.text}</div>
+            <div className="mt-1 text-sm">{m.text}</div>
           </div>
         ))}
       </div>
 
       {/* Files list */}
-      <div className="mb-3">
-        <h4 className="text-sm font-medium mb-2">Files</h4>
+      <div className="px-6 py-4 bg-white border-t border-gray-200">
+        <h4 className="text-sm font-medium mb-3 text-gray-700">Files</h4>
         <div className="space-y-2">
           {room.files.length === 0 && (
             <div className="text-xs text-gray-400">No files uploaded</div>
@@ -283,41 +291,39 @@ function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
           {room.files.map((f) => (
             <div
               key={f.id}
-              className="flex items-center justify-between bg-white rounded p-2 shadow-sm">
+              className="flex items-center justify-between bg-gray-50 hover:bg-gray-100 rounded-lg p-3 shadow-sm border border-gray-200 transition">
               <div>
                 <div className="text-sm font-medium">{f.name}</div>
                 <div className="text-xs text-gray-500">
                   {f.size} • {formatTime(f.time)}
                 </div>
               </div>
-              <div>
-                <button
-                  className="px-2 py-1 bg-gray-100 rounded text-xs"
-                  onClick={() => alert(`Download ${f.name} (demo)`)}>
-                  Download
-                </button>
-              </div>
+              <button
+                className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs"
+                onClick={() => alert(`Download ${f.name} (demo)`)}>
+                Download
+              </button>
             </div>
           ))}
         </div>
       </div>
 
       {/* Composer */}
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center px-6 py-4 bg-gray-50 border-t border-gray-200">
         <input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="flex-1 border border-gray-200 rounded px-3 py-2 focus:ring-2 focus:ring-blue-400"
+          className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-sm"
           placeholder="Type a message..."
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
-        <label className="bg-gray-100 px-3 py-2 rounded cursor-pointer text-sm">
+        <label className="bg-gray-100 px-3 py-2 rounded-lg cursor-pointer text-sm border border-gray-300 hover:bg-gray-200 transition">
           <input type="file" className="hidden" onChange={handleFileChange} />
           Attach
         </label>
         <button
           onClick={handleSend}
-          className="px-4 py-2 bg-blue-600 text-white rounded">
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow text-sm transition">
           Send
         </button>
       </div>
@@ -405,7 +411,7 @@ export default function MakeRoomPage() {
   const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
 
   return (
-    <div className="p-4 min-h-screen bg-gray-50">
+    <div className="p-4 min-h-screen bg-gray-50 mb-[3rem]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column: Create + Rooms list (span 2 on lg) */}
         <div className="lg:col-span-2 flex flex-col gap-4">
@@ -423,7 +429,7 @@ export default function MakeRoomPage() {
         </div>
 
         {/* Right column: Chat / Files */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 max-h-[80vh]">
           <ChatPanel
             room={selectedRoom}
             onSendMessage={handleSendMessage}
