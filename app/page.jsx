@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 
-import { EditorsSection, FilesTable } from "../components";
+import EditorsSection from "../components/EditorsSection";
+import FilesTable from "../components/FilesTable";
 
 export default function Page() {
   const [files] = useState([

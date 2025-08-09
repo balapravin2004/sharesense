@@ -1,6 +1,7 @@
 "use client";
 
-import { Sidebar, Topbar } from "../components";
+import Sidebar from "../components/Sidebar";
+import Topbar from "../components/Topbar";
 
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
