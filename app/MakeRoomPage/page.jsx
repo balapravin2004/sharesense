@@ -177,7 +177,7 @@ function RoomsList({ rooms, onJoin, onDelete, onCopy }) {
   );
 }
 
-export function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
+function ChatPanel({ room, onSendMessage, onUploadFile, onLeave }) {
   const [message, setMessage] = useState("");
   const messagesRef = useRef(null);
 
