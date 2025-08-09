@@ -3,7 +3,7 @@
 import React from "react";
 import toast from "react-hot-toast";
 import { LogOut } from "lucide-react";
-
+//adding comments here
 const LogoutButton = ({ collapsed, isMobile }) => (
   <button
     onClick={() => toast.success("Logged out successfully")}
