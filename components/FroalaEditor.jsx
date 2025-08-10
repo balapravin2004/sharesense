@@ -23,8 +23,8 @@ export default function FroalaEditorWrapper() {
   const config = {
     placeholderText: "Start typing here...",
     charCounterCount: true,
-    height: 200, // Custom height
-    quickInsertEnabled: false, // Disable Quick Insert
+    height: 200,
+    quickInsertEnabled: false,
     toolbarButtons: [
       [
         "fullscreen",
@@ -60,6 +60,7 @@ export default function FroalaEditorWrapper() {
         "codeView",
         "selectAll",
         "clearFormatting",
+        "save", // Added Save button in toolbar
       ],
     ],
     pluginsEnabled: [
@@ -88,7 +89,7 @@ export default function FroalaEditorWrapper() {
       "paragraphFormat",
       "paragraphStyle",
       "print",
-      "quote", // QuickInsert removed here
+      "quote",
       "save",
       "specialCharacters",
       "table",
@@ -96,6 +97,15 @@ export default function FroalaEditorWrapper() {
       "video",
       "wordPaste",
     ],
+    events: {
+      "save.before": function (html) {
+        console.log("Saving content:", html);
+        alert("Content saved! Check console log.");
+        // Example: send content to backend API
+        // fetch("/api/save", { method: "POST", body: JSON.stringify({ content: html }) })
+        return false; // Prevent Froala's default save behavior
+      },
+    },
   };
 
   return (

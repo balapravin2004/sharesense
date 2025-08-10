@@ -411,7 +411,7 @@ export default function MakeRoomPage() {
   const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
 
   return (
-    <div className="p-4 min-h-screen bg-gray-50 mb-[3rem]">
+    <div className="p-4 h-full  bg-gray-50 ">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column: Create + Rooms list (span 2 on lg) */}
         <div className="lg:col-span-2 flex flex-col gap-4">
