@@ -12,7 +12,7 @@ export default function Page() {
   ]);
 
   return (
-    <div className="flex flex-col min-h-[90vh] bg-white p-6 z-[100]">
+    <div className="flex flex-col p-4 z-[100]  lg:p-8 min-h-screen bg-gray-50 overflow-x-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
         <EditorsSection />
         <FilesTable files={files} />

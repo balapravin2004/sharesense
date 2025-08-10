@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="flex min-h-screen transition-all duration-300  sidebar-gradient  rounded-tl-2xl rounded-bl-2xl">
         <Sidebar />
-        <div className="flex flex-col flex-grow">
+        <div className="flex flex-col flex-1">
           <Topbar />
           <main className="overflow-y-auto md:h-[90vh] rounded-2xl border border-none">
             <Toaster position="top-center" />

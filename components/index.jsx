@@ -4,7 +4,7 @@ import Navitem from "./NavItem";
 import Navlist from "./NavList";
 import AppShell from "./appshell";
 import FilesTable from "./FilesTable";
-import TinyEditor from "./TinyEditor";
+import FroalaEditor from "./FroalaEditor";
 import LogoutButton from "./LogoutButton";
 import EditorsSection from "./EditorsSection";
 import SidebarDesktop from "./SidebarDesktop";
@@ -17,7 +17,7 @@ export {
   Navlist,
   AppShell,
   FilesTable,
-  TinyEditor,
+  FroalaEditor,
   LogoutButton,
   EditorsSection,
   SidebarDesktop,

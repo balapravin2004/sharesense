@@ -237,7 +237,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-4 lg:p-8 min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="p-4 lg:p-8 h-full bg-gray-50 overflow-x-hidden">
       <div className="max-w-6xl mx-auto space-y-6">
         <header className="flex items-center justify-between">
           <div>
