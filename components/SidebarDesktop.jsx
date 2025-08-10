@@ -33,7 +33,7 @@ export default function SidebarDesktop() {
   return (
     <div
       className={`hidden md:flex h-screen text-white p-4 flex-col justify-between bg-transparent transition-all duration-300 ${
-        collapsed ? "w-20" : "w-60"
+        collapsed ? "w-20" : "w-72"
       }`}>
       <NavList items={navItems} pathname={pathname} collapsed={collapsed} />
       <LogoutButton collapsed={collapsed} />
