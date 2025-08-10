@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
 // Dynamically load editor to avoid SSR issues
@@ -8,17 +8,17 @@ const FroalaEditorComponent = dynamic(
   { ssr: false }
 );
 
-// Import Froala styles
-import "froala-editor/css/froala_style.min.css";
-import "froala-editor/css/froala_editor.pkgd.min.css";
-import "froala-editor/css/plugins.pkgd.min.css";
-import "font-awesome/css/font-awesome.css";
-
-// Import Froala JS plugins
-import "froala-editor/js/plugins.pkgd.min.js";
-
 export default function FroalaEditorWrapper() {
   const [content, setContent] = useState("");
+
+  // Import Froala styles and JS only in the browser
+  useEffect(() => {
+    require("froala-editor/css/froala_style.min.css");
+    require("froala-editor/css/froala_editor.pkgd.min.css");
+    require("froala-editor/css/plugins.pkgd.min.css");
+    require("font-awesome/css/font-awesome.css");
+    require("froala-editor/js/plugins.pkgd.min.js");
+  }, []);
 
   const config = {
     placeholderText: "Start typing here...",
@@ -60,7 +60,7 @@ export default function FroalaEditorWrapper() {
         "codeView",
         "selectAll",
         "clearFormatting",
-        "save", // Added Save button in toolbar
+        "save",
       ],
     ],
     pluginsEnabled: [
@@ -101,9 +101,7 @@ export default function FroalaEditorWrapper() {
       "save.before": function (html) {
         console.log("Saving content:", html);
         alert("Content saved! Check console log.");
-        // Example: send content to backend API
-        // fetch("/api/save", { method: "POST", body: JSON.stringify({ content: html }) })
-        return false; // Prevent Froala's default save behavior
+        return false; // Prevent default save
       },
     },
   };
