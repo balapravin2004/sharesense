@@ -7,6 +7,41 @@
     "start": "next start"
   },
   "dependencies": {
+    "@tinymce/tinymce-react": "^6.3.0",
+    "@uploadthing/mime-types": "^0.3.5",
+    "@uploadthing/react": "^7.3.2",
+    "autoprefixer": "^10.4.15",
+    "font-awesome": "^4.7.0",
+    "froala-editor": "^4.6.0",
+    "lucide-react": "^0.278.0",
+    "next": "15.3.4",
+    "postcss": "^8.4.24",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-froala-wysiwyg": "^4.6.0",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.8.0",
+    "tailwindcss": "^3.4.1",
+    "uploadthing": "^7.7.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.7",
+    "@types/node": "24.0.4",
+    "@types/react": "19.1.8",
+    "typescript": "5.8.3"
+  }
+}
+
+{
+  "name": "easy-share",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
     "@uploadthing/mime-types": "^0.3.5",
     "@uploadthing/react": "^7.3.2",
     "autoprefixer": "^10.4.15",
