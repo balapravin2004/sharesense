@@ -97,8 +97,6 @@ export default function FroalaEditor({ value, onChange }) {
     ],
     events: {
       "save.before": function (html) {
-        console.log("Saving content:", html);
-        alert("Content saved! Check console log.");
         return false; // Prevent default save
       },
     },
