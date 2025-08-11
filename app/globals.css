@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.sidebar-gradient {
+  background: linear-gradient(
+    45deg,
+    #00b7ff,
+    #00b7ff 25%,
+    #0033ff 50%,
+    #00b7ff 75%
+  );
+  background-size: 400% 400%;
+  animation: gradientAnimation 7s ease infinite;
+}
