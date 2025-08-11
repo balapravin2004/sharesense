@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  passwordHash  String
+  files         File[]
+  shareSessions ShareSession[]
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+}
+
+model File {
+  id             String         @id @default(cuid())
+  filename       String
+  mimeType       String
+  size           Int
+  url            String         // Could be local path or cloud storage URL
+  uploadedBy     User?          @relation(fields: [uploadedById], references: [id])
+  uploadedById   String?
+  isAnonymous    Boolean        @default(false) // ✅ Anonymous upload flag
+  expiresAt      DateTime?      // Optional cleanup date for anonymous files
+  shareSessions  ShareSession[]
+  createdAt      DateTime       @default(now())
+}
+
+model ShareSession {
+  id         String   @id @default(cuid())
+  file       File     @relation(fields: [fileId], references: [id])
+  fileId     String
+  owner      User?    @relation(fields: [ownerId], references: [id])
+  ownerId    String?
+  isPublic   Boolean  @default(true)
+  expiresAt  DateTime?
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
