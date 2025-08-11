@@ -32,3 +32,5 @@ Thumbs.db
 
 # Misc
 *.tgz
+
+/app/generated/prisma
