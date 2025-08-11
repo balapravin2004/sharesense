@@ -1,17 +1,15 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 
-// Dynamically load editor to avoid SSR issues
+// Dynamically import Froala to avoid SSR issues in Next.js
 const FroalaEditorComponent = dynamic(
   () => import("react-froala-wysiwyg").then((mod) => mod.default),
   { ssr: false }
 );
 
-export default function FroalaEditorWrapper() {
-  const [content, setContent] = useState("");
-
-  // Import Froala styles and JS only in the browser
+export default function FroalaEditor({ value, onChange }) {
+  // Load Froala styles and JS in the browser
   useEffect(() => {
     require("froala-editor/css/froala_style.min.css");
     require("froala-editor/css/froala_editor.pkgd.min.css");
@@ -99,8 +97,6 @@ export default function FroalaEditorWrapper() {
     ],
     events: {
       "save.before": function (html) {
-        console.log("Saving content:", html);
-        alert("Content saved! Check console log.");
         return false; // Prevent default save
       },
     },
@@ -109,8 +105,8 @@ export default function FroalaEditorWrapper() {
   return (
     <FroalaEditorComponent
       tag="textarea"
-      model={content}
-      onModelChange={setContent}
+      model={value}
+      onModelChange={onChange}
       config={config}
     />
   );
