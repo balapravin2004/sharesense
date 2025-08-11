@@ -15,6 +15,7 @@ model User {
   files         File[]
   shareSessions ShareSession[]
   notifications Notification[]
+  notes         Note[]
   createdAt     DateTime       @default(now())
 }
 
@@ -23,11 +24,11 @@ model File {
   filename       String
   mimeType       String
   size           Int
-  url            String         // Could be local path or cloud storage URL
+  url            String
   uploadedBy     User?          @relation(fields: [uploadedById], references: [id])
   uploadedById   String?
-  isAnonymous    Boolean        @default(false) // ✅ Anonymous upload flag
-  expiresAt      DateTime?      // Optional cleanup date for anonymous files
+  isAnonymous    Boolean        @default(false)
+  expiresAt      DateTime?
   shareSessions  ShareSession[]
   createdAt      DateTime       @default(now())
 }
@@ -50,4 +51,12 @@ model Notification {
   userId    String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  content   String
+  timing    DateTime @default(now())
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  String?
 }
