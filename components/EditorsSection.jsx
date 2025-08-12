@@ -13,7 +13,6 @@ export default function EditorsSection() {
   const gradientBtn =
     "px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-90 transition";
 
-  // Upload note
   const handleUpload = async () => {
     if (!content || !content.trim()) {
       toast.error("Content is required before uploading!");
@@ -38,7 +37,6 @@ export default function EditorsSection() {
     }
   };
 
-  // Receive latest note
   const handleReceive = async () => {
     setIsReceiving(true);
     try {
