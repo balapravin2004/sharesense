@@ -1,113 +1,109 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
-import { Upload, Trash2, Loader2 } from "lucide-react";
 
-export default function Page() {
+import NotesHeader from "../../components/NotesHeader";
+import NotesTable from "../../components/NotesTable";
+import NotesMobileList from "../../components/NotesMobileList";
+import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+
+export default function AllNotesPage() {
   const [notes, setNotes] = useState([]);
+  const [filteredNotes, setFilteredNotes] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [query, setQuery] = useState("");
 
   const fetchAllNotes = async () => {
-    const loadingToast = toast.loading("Fetching notes...");
+    const toastId = toast.loading("Fetching notes...");
+    setLoading(true);
     try {
       const res = await axios.get("/api/allnotes");
-      setNotes(res.data);
-      toast.dismiss(loadingToast);
-      toast.success("Notes loaded");
+      const data = Array.isArray(res.data) ? res.data : res.data?.notes ?? [];
+      setNotes(data);
+      setFilteredNotes(data);
+      toast.success("Notes loaded", { id: toastId });
     } catch (error) {
-      toast.dismiss(loadingToast);
-      toast.error("Error fetching notes");
+      toast.error(error.response?.data?.error || "Error fetching notes", {
+        id: toastId,
+      });
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleDelete = async (id) => {
-    setLoadingDelete(true);
-    try {
-      await axios.delete(`/api/deletenote/${id}`);
-      toast.success("Deleted successfully");
-      setNotes((prev) => prev.filter((n) => n.id !== id));
-    } catch (error) {
-      console.log("error");
-      console.log(error.message);
-      toast.error("Error deleting note");
-    }
-    setLoadingDelete(false);
-    setDeleteId(null);
   };
 
   useEffect(() => {
     fetchAllNotes();
   }, []);
 
-  return (
-    <div className={`p-2 bg-gray-50 min-h-screen`}>
-      <div className="bg-white rounded-lg shadow p-4 overflow-x-auto">
-        <h2 className="text-lg font-semibold mb-4">All Notes</h2>
-        <table className="w-full border-collapse text-sm sm:text-base">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="p-3 border w-12">ID</th>
-              <th className="p-3 border">NOTE</th>
-              <th className="p-3 border">TIME</th>
-              <th className="p-3 border">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {notes.length > 0 ? (
-              notes.map((note, index) => {
-                const preview =
-                  note.content.length > 100
-                    ? note.content.slice(0, 100) + "..."
-                    : note.content;
-                return (
-                  <tr key={note.id || index} className="hover:bg-gray-50">
-                    <td className="p-3 border">{index + 1}</td>
-                    <td
-                      className="p-3 border max-w-xs sm:max-w-sm lg:max-w-md overflow-hidden"
-                      dangerouslySetInnerHTML={{ __html: preview }}
-                    />
-                    <td className="p-3 border">
-                      {note.timing
-                        ? new Date(note.timing).toLocaleString()
-                        : "—"}
-                    </td>
-                    <td className="p-3 border flex gap-2">
-                      <button className="p-2 rounded bg-blue-500 text-white hover:bg-blue-600">
-                        <Upload size={16} />
-                      </button>
-                      <button
-                        className="p-2 rounded bg-red-500 text-white hover:bg-red-600 flex items-center justify-center"
-                        onClick={() => setDeleteId(note.id)}>
-                        {loadingDelete && deleteId === note.id ? (
-                          <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                          <Trash2 size={16} />
-                        )}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="4" className="p-3 text-center text-gray-500">
-                  No notes found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+  useEffect(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return setFilteredNotes(notes);
 
-      {deleteId && (
-        <ConfirmDeleteModal
-          onCancel={() => setDeleteId(null)}
-          onConfirm={() => handleDelete(deleteId)}
+    const filtered = notes.filter((n) => {
+      const text = (n.content || "").replace(/<[^>]*>/g, "").toLowerCase();
+      return text.includes(q);
+    });
+    setFilteredNotes(filtered);
+  }, [query, notes]);
+
+  const handleDelete = async (id) => {
+    setDeletingId(id);
+    try {
+      await axios.delete(`/api/deletenote/${id}`);
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+      setFilteredNotes((prev) => prev.filter((n) => n.id !== id));
+      toast.success("Deleted successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.error || "Error deleting note");
+    } finally {
+      setDeletingId(null);
+      setDeleteId(null);
+    }
+  };
+
+  const previewText = (html) => {
+    if (!html) return "";
+    const stripped = html.replace(/<[^>]*>/g, "");
+    return stripped.length > 120 ? stripped.slice(0, 120) + "..." : stripped;
+  };
+
+  return (
+    <div className="p-3 bg-gray-50 min-h-screen">
+      <div className="max-w-6xl mx-auto">
+        <NotesHeader
+          query={query}
+          setQuery={setQuery}
+          onRefresh={fetchAllNotes}
         />
-      )}
+
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <NotesTable
+            loading={loading}
+            notes={filteredNotes}
+            previewText={previewText}
+            deletingId={deletingId}
+            onDelete={(id) => setDeleteId(id)}
+          />
+          <NotesMobileList
+            loading={loading}
+            notes={filteredNotes}
+            previewText={previewText}
+            deletingId={deletingId}
+            onDelete={(id) => setDeleteId(id)}
+          />
+        </div>
+
+        {deleteId && (
+          <ConfirmDeleteModal
+            onCancel={() => setDeleteId(null)}
+            onConfirm={() => handleDelete(deleteId)}
+          />
+        )}
+      </div>
     </div>
   );
 }
