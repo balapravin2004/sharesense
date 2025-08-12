@@ -21,7 +21,7 @@ export default function FroalaEditor({ value, onChange }) {
   const config = {
     placeholderText: "Start typing here...",
     charCounterCount: true,
-    height: 200,
+    height: 350,
     quickInsertEnabled: false,
     toolbarButtons: [
       [
