@@ -43,7 +43,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div className={`p-6 bg-gray-50 min-h-screen`}>
+    <div className={`p-2 bg-gray-50 min-h-screen`}>
       <div className="bg-white rounded-lg shadow p-4 overflow-x-auto">
         <h2 className="text-lg font-semibold mb-4">All Notes</h2>
         <table className="w-full border-collapse text-sm sm:text-base">
