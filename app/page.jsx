@@ -83,14 +83,12 @@ export default function Page() {
             <div className="flex-1 p-4 space-y-3 overflow-y-auto bg-gray-100">
               {messages.map((m, i) => (
                 <div
-                  className={`px-4 py-2 rounded-2xl max-w-[80%] text-sm shadow break-words whitespace-pre-wrap
-    ${
-      m.from === "user"
-        ? "bg-blue-500 text-white rounded-br-none"
-        : "bg-white text-gray-800 rounded-bl-none"
-    }`}>
+                  key={i}
+                  className={`flex ${
+                    m.from === "user" ? "justify-end" : "justify-start"
+                  }`}>
                   <div
-                    className={`px-4 py-2 rounded-2xl max-w-[80%] text-sm shadow
+                    className={`px-4 py-2 rounded-2xl max-w-[80%] text-sm shadow break-words whitespace-pre-wrap
                       ${
                         m.from === "user"
                           ? "bg-blue-500 text-white rounded-br-none"
