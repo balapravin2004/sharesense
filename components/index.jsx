@@ -3,13 +3,17 @@ import Sidebar from "./Sidebar";
 import Navitem from "./NavItem";
 import Navlist from "./NavList";
 import AppShell from "./appshell";
+import NotesTable from "./NotesTable";
 import FilesTable from "./FilesTable";
-import FroalaEditor from "./FroalaEditor";
+import QuillEditor from "./QuillEditor";
+import NotesHeader from "./NotesHeader";
+import FroalaEditor from "./FroalaEdtior";
 import LogoutButton from "./LogoutButton";
 import EditorsSection from "./EditorsSection";
 import SidebarDesktop from "./SidebarDesktop";
+import NotesMobileList from "./NotesMobileList";
 import BottomNavMobile from "./BottomNavMobile";
-
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
 export {
   Topbar,
   Sidebar,
@@ -17,9 +21,14 @@ export {
   Navlist,
   AppShell,
   FilesTable,
+  NotesTable,
+  QuillEditor,
+  NotesHeader,
   FroalaEditor,
   LogoutButton,
   EditorsSection,
   SidebarDesktop,
+  NotesMobileList,
   BottomNavMobile,
+  ConfirmDeleteModal,
 };

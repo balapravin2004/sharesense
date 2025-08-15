@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ConfirmDeleteModal({ onCancel, onConfirm }) {
+export default function ConfirmDeleteModal({ onCancel, onConfirm, loading }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Blurred dark overlay */}
@@ -16,13 +16,22 @@ export default function ConfirmDeleteModal({ onCancel, onConfirm }) {
         <div className="flex justify-center gap-4">
           <button
             onClick={onCancel}
-            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+            disabled={loading}
+            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50">
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-            Delete
+            disabled={loading}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center gap-2 disabled:opacity-50">
+            {loading ? (
+              <>
+                <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                Deleting...
+              </>
+            ) : (
+              "Delete"
+            )}
           </button>
         </div>
       </div>
