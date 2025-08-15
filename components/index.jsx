@@ -2,7 +2,7 @@ import Topbar from "./Topbar";
 import Sidebar from "./Sidebar";
 import Navitem from "./NavItem";
 import Navlist from "./NavList";
-import AppShell from "./appshell";
+import AppShell from "./AppShell";
 import NotesTable from "./NotesTable";
 import FilesTable from "./FilesTable";
 import QuillEditor from "./QuillEditor";
@@ -15,7 +15,7 @@ import SidebarDesktop from "./SidebarDesktop";
 import NotesMobileList from "./NotesMobileList";
 import BottomNavMobile from "./BottomNavMobile";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
-
+//addin commne there
 export {
   Topbar,
   Sidebar,
