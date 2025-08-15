@@ -100,6 +100,16 @@ export default function FroalaEditor({ value, onChange }) {
         return false; // Prevent default save
       },
     },
+    imageUploadURL: "/api/upload",
+    imageUploadMethod: "POST",
+    events: {
+      "image.inserted": function (img) {
+        console.log("Image inserted:", img[0].src);
+      },
+      "image.error": function (error) {
+        console.error("Image upload error:", error);
+      },
+    },
   };
 
   return (

@@ -101,6 +101,7 @@ export default function AllNotesPage() {
           <ConfirmDeleteModal
             onCancel={() => setDeleteId(null)}
             onConfirm={() => handleDelete(deleteId)}
+            deletingId={deletingId === deleteId} // true only for the note being deleted
           />
         )}
       </div>
