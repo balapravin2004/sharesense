@@ -8,12 +8,14 @@ import FilesTable from "./FilesTable";
 import QuillEditor from "./QuillEditor";
 import NotesHeader from "./NotesHeader";
 import FroalaEditor from "./FroalaEdtior";
+import GeminiButton from "./GeminiButton";
 import LogoutButton from "./LogoutButton";
 import EditorsSection from "./EditorsSection";
 import SidebarDesktop from "./SidebarDesktop";
 import NotesMobileList from "./NotesMobileList";
 import BottomNavMobile from "./BottomNavMobile";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
+
 export {
   Topbar,
   Sidebar,
@@ -24,6 +26,7 @@ export {
   NotesTable,
   QuillEditor,
   NotesHeader,
+  GeminiButton,
   FroalaEditor,
   LogoutButton,
   EditorsSection,
