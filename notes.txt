@@ -1,0 +1,4 @@
+1. sperate page for saving content with autosave 
+2. share button in table
+3. sperate page for uploded images with share options only for related to content
+4. names for images also with search filter
