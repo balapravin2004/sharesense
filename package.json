@@ -7,6 +7,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.13.0",
     "@tinymce/tinymce-react": "^6.3.0",
     "@uploadthing/mime-types": "^0.3.5",
