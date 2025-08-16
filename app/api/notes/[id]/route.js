@@ -24,3 +24,27 @@ export async function GET(req, { params }) {
     );
   }
 }
+
+export async function PUT(req, { params }) {
+  try {
+    const { id } = params;
+    const { content } = await req.json();
+
+    if (!id || !content) {
+      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    }
+
+    const updatedNote = await prisma.note.update({
+      where: { id },
+      data: { content },
+    });
+
+    return NextResponse.json({ success: true, note: updatedNote });
+  } catch (error) {
+    console.error("AutoSave API Error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
