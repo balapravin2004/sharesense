@@ -9,10 +9,10 @@ export default function BottomNavMobile() {
 
   const navItems = [
     { icon: Home, route: "/", label: "Home" },
+    { icon: FileText, route: "/AllNotesPage", label: "All Notes" },
     { icon: Lock, route: "/SecureSharePage", label: "Secure Share" },
     { icon: UserPlus, route: "/MakeRoomPage", label: "Make Room" },
     { icon: Settings, route: "/SettingsPage", label: "Settings" },
-    { icon: FileText, route: "/AllNotesPage", label: "All Notes" },
   ];
 
   return (
