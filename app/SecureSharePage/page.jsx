@@ -131,7 +131,7 @@ export default function SecureSharePage() {
   }
 
   return (
-    <div className="p-4 h-full bg-gray-50">
+    <div className="p-4 min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6 gap-4">
           <div>
