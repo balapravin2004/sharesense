@@ -87,6 +87,7 @@ export default function AllNotesPage() {
             previewText={previewText}
             deletingId={deletingId}
             onDelete={(id) => setDeleteId(id)}
+            fetchNotesFunction={fetchAllNotes}
           />
           <NotesMobileList
             loading={loading}

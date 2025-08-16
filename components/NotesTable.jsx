@@ -1,7 +1,23 @@
 "use client";
 
-import React from "react";
-import { Upload, Trash2, Loader2 } from "lucide-react";
+import React, { useState } from "react";
+import { Upload, Trash2, Loader2, Share2 } from "lucide-react";
+import { WhatsappShareButton, EmailShareButton } from "react-share";
+import { FaWhatsapp, FaEnvelope } from "react-icons/fa";
+import ShareModal from "./ShareModal";
+
+function timeAgo(timestamp) {
+  if (!timestamp) return "—";
+  const now = new Date();
+  const diff = Math.floor((now - new Date(timestamp)) / 1000);
+
+  if (diff < 60) return `${diff} sec ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
+  if (diff < 31536000) return `${Math.floor(diff / 2592000)} months ago`;
+  return `${Math.floor(diff / 31536000)} years ago`;
+}
 
 export default function NotesTable({
   loading,
@@ -9,9 +25,12 @@ export default function NotesTable({
   previewText,
   deletingId,
   onDelete,
+  fetchNotesFunction,
 }) {
+  const [shareNote, setShareNote] = useState(null);
+
   return (
-    <div className="hidden md:block">
+    <div className="hidden md:block max-h-[32rem]  xl:max-h-[40rem] overflow-auto">
       <table className="w-full table-auto text-sm sm:text-base">
         <thead className="bg-gray-100 text-left">
           <tr>
@@ -50,15 +69,25 @@ export default function NotesTable({
                   />
                 </td>
                 <td className="p-3 border align-top text-gray-600 text-sm">
-                  {note.timing ? new Date(note.timing).toLocaleString() : "—"}
+                  {timeAgo(note.timing)}
                 </td>
                 <td className="p-3 border align-top">
                   <div className="flex gap-2">
-                    <button className="px-3 py-2 rounded bg-indigo-500 text-white hover:bg-indigo-600 flex items-center gap-2">
+                    {/* Upload Button */}
+                    <button
+                      onClick={async () => {
+                        await fetch("/api/uploadnotetoend", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ noteId: note.id }),
+                        });
+                        fetchNotesFunction();
+                      }}
+                      className="px-3 py-2 rounded bg-indigo-500 text-white hover:bg-indigo-600 flex items-center gap-2">
                       <Upload className="w-4 h-4" />
-                      <span className="hidden sm:inline">Upload</span>
                     </button>
 
+                    {/* Delete Button */}
                     <button
                       onClick={() => onDelete(note.id)}
                       className="px-3 py-2 rounded bg-red-500 text-white hover:bg-red-600 flex items-center justify-center gap-2">
@@ -67,7 +96,13 @@ export default function NotesTable({
                       ) : (
                         <Trash2 className="w-4 h-4" />
                       )}
-                      <span className="hidden sm:inline">Delete</span>
+                    </button>
+
+                    {/* Share Button */}
+                    <button
+                      onClick={() => setShareNote(note)}
+                      className="px-3 py-2 rounded bg-green-500 text-white hover:bg-green-600 flex items-center gap-2">
+                      <Share2 className="w-4 h-4" />
                     </button>
                   </div>
                 </td>
@@ -76,6 +111,15 @@ export default function NotesTable({
           )}
         </tbody>
       </table>
+
+      {/* Share Modal */}
+      {shareNote && (
+        <ShareModal
+          isOpen={!!shareNote}
+          onClose={() => setShareNote(null)}
+          note={shareNote}
+        />
+      )}
     </div>
   );
 }
