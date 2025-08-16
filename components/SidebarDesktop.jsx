@@ -26,10 +26,10 @@ export default function SidebarDesktop() {
       isButton: true,
     },
     { label: "Home", icon: Home, route: "/" },
+    { label: "All Notes", icon: FileText, route: "/AllNotesPage" },
     { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
     { label: "Make Room", icon: UserPlus, route: "/MakeRoomPage" },
     { label: "Settings", icon: Settings, route: "/SettingsPage" },
-    { label: "All Notes", icon: FileText, route: "/AllNotesPage" },
   ];
 
   return (
