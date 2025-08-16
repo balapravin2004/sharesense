@@ -5,3 +5,4 @@
 5. make it PWA
 6. file sharing feature with file upload progress with drag and drop feature 
 7. another upload button
+8. multiple select delete
