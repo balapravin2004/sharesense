@@ -8,7 +8,7 @@ const FroalaEditorComponent = dynamic(
   { ssr: false }
 );
 
-export default function FroalaEditor({ value, onChange }) {
+export default function FroalaEditor({ value, onChange, editorHeight }) {
   // Load Froala styles and JS in the browser
   useEffect(() => {
     require("froala-editor/css/froala_style.min.css");
@@ -21,7 +21,7 @@ export default function FroalaEditor({ value, onChange }) {
   const config = {
     placeholderText: "Start typing here...",
     charCounterCount: true,
-    height: 350,
+    height: editorHeight || 350,
     quickInsertEnabled: false,
     toolbarButtons: [
       [
