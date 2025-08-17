@@ -85,13 +85,11 @@ export default function AllNotesPage() {
           />
           <button
             onClick={() => setShowImages(!showImages)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mt-12">
-            {/* Desktop text */}
+            className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mt-12">
             <span className="hidden sm:inline">
               {showImages ? "Hide Images" : "See Images"}
             </span>
 
-            {/* Mobile icon */}
             <span className="sm:hidden">
               {showImages ? <X size={20} /> : <ImageIcon size={20} />}
             </span>
