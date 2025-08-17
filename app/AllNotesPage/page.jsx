@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Image as ImageIcon, X } from "lucide-react";
 
 import NotesHeader from "../../components/NotesHeader";
 import NotesTable from "../../components/NotesTable";
 import NotesMobileList from "../../components/NotesMobileList";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+import NotesImages from "../../components/NotesImages";
 
 export default function AllNotesPage() {
   const [notes, setNotes] = useState([]);
@@ -16,6 +18,7 @@ export default function AllNotesPage() {
   const [deleteId, setDeleteId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [query, setQuery] = useState("");
+  const [showImages, setShowImages] = useState(false);
 
   const fetchAllNotes = async () => {
     const toastId = toast.loading("Fetching notes...");
@@ -74,36 +77,53 @@ export default function AllNotesPage() {
   return (
     <div className="p-3 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto">
-        <NotesHeader
-          query={query}
-          setQuery={setQuery}
-          onRefresh={fetchAllNotes}
-        />
+        <div className="flex items-center justify-between mb-4">
+          <NotesHeader
+            query={query}
+            setQuery={setQuery}
+            onRefresh={fetchAllNotes}
+          />
+          <button
+            onClick={() => setShowImages(!showImages)}
+            className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mt-12">
+            <span className="hidden sm:inline">
+              {showImages ? "Hide Images" : "See Images"}
+            </span>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <NotesTable
-            loading={loading}
-            notes={filteredNotes}
-            previewText={previewText}
-            deletingId={deletingId}
-            onDelete={(id) => setDeleteId(id)}
-            fetchNotesFunction={fetchAllNotes}
-          />
-          <NotesMobileList
-            loading={loading}
-            notes={filteredNotes}
-            previewText={previewText}
-            deletingId={deletingId}
-            onDelete={(id) => setDeleteId(id)}
-            fetchNotesFunction={fetchAllNotes}
-          />
+            <span className="sm:hidden">
+              {showImages ? <X size={20} /> : <ImageIcon size={20} />}
+            </span>
+          </button>
         </div>
+
+        {showImages ? (
+          <NotesImages visible={showImages} />
+        ) : (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <NotesTable
+              loading={loading}
+              notes={filteredNotes}
+              previewText={previewText}
+              deletingId={deletingId}
+              onDelete={(id) => setDeleteId(id)}
+              fetchNotesFunction={fetchAllNotes}
+            />
+            <NotesMobileList
+              loading={loading}
+              notes={filteredNotes}
+              previewText={previewText}
+              deletingId={deletingId}
+              onDelete={(id) => setDeleteId(id)}
+              fetchNotesFunction={fetchAllNotes}
+            />
+          </div>
+        )}
 
         {deleteId && (
           <ConfirmDeleteModal
             onCancel={() => setDeleteId(null)}
             onConfirm={() => handleDelete(deleteId)}
-            deletingId={deletingId === deleteId} // true only for the note being deleted
+            deletingId={deletingId === deleteId}
           />
         )}
       </div>

@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Upload, Trash2, Loader2, Share2 } from "lucide-react";
 import { WhatsappShareButton, EmailShareButton } from "react-share";
 import { FaWhatsapp, FaEnvelope } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+
 import axios from "axios";
 
 function timeAgo(timestamp) {
@@ -30,6 +32,7 @@ export default function NotesMobileList({
   const [shareNoteId, setShareNoteId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const router = useRouter();
 
   // ✅ Toggle checkbox
   const toggleSelect = (id) => {
@@ -54,7 +57,7 @@ export default function NotesMobileList({
   };
 
   return (
-    <div className="md:hidden p-1 mb-14 md:mb-auto overflow-scroll max-h-[30rem]">
+    <div className="md:hidden p-1 mb-14 md:mb-auto overflow-auto max-h-[30rem]">
       {/* Bulk delete header */}
       {selectedIds.length > 0 && (
         <div className="flex justify-between items-center mb-3 p-2 bg-gray-50 border rounded">
@@ -103,12 +106,16 @@ export default function NotesMobileList({
 
               {/* Note Content */}
               <div className="flex-1">
-                <div
-                  className="text-sm text-gray-800 mb-2"
-                  dangerouslySetInnerHTML={{
-                    __html: previewText(note.content),
-                  }}
-                />
+                <td
+                  className="p-1 align-top max-w-lg cursor-pointer hover:underline"
+                  onClick={() => router.push(`/notes/${note.id}`)}>
+                  <div
+                    className="text-sm text-gray-800"
+                    dangerouslySetInnerHTML={{
+                      __html: previewText(note.content),
+                    }}
+                  />
+                </td>
               </div>
 
               {/* Actions Row */}
