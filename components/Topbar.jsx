@@ -34,7 +34,9 @@ const DropdownMenu = ({ dropdownRef }) => (
 /* --------------------- MOBILE TOPBAR --------------------- */
 const TopbarMobile = ({ toggleDropdown, dropdownOpen, dropdownRef }) => (
   <div className="w-full transition-all duration-300 sidebar-gradient text-white px-4 py-3 flex justify-between items-center sticky top-0  md:hidden z-[200]">
-    <div className="text-xl font-bold tracking-wide">Share Bhai</div>
+    <div className="text-xl font-bold tracking-wide">
+      <Link href="/">ShareBro</Link>
+    </div>
     <div className="flex items-center gap-5 relative">
       <button
         onClick={toggleDropdown}
@@ -51,7 +53,9 @@ const TopbarMobile = ({ toggleDropdown, dropdownOpen, dropdownRef }) => (
 /* --------------------- DESKTOP TOPBAR --------------------- */
 const TopbarDesktop = ({ toggleDropdown, dropdownOpen, dropdownRef }) => (
   <div className="w-full transition-all duration-300 bg-transparent text-white px-4 py-3  justify-between items-center sticky top-0  hidden md:flex">
-    <div className="text-xl font-bold tracking-wide">Share Bhai</div>
+    <div className="text-xl font-bold tracking-wide">
+      <Link href="/">ShareBro</Link>
+    </div>
     <div className="flex items-center gap-5 relative">
       <button
         onClick={toggleDropdown}
