@@ -9,6 +9,7 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  FileText,
 } from "lucide-react";
 import NavList from "./NavList";
 import LogoutButton from "./LogoutButton";
@@ -25,6 +26,7 @@ export default function SidebarDesktop() {
       isButton: true,
     },
     { label: "Home", icon: Home, route: "/" },
+    { label: "All Notes", icon: FileText, route: "/AllNotesPage" },
     { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
     { label: "Make Room", icon: UserPlus, route: "/MakeRoomPage" },
     { label: "Settings", icon: Settings, route: "/SettingsPage" },

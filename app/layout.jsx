@@ -9,7 +9,13 @@ import "./globals.css";
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen transition-all duration-300  sidebar-gradient  rounded-tl-2xl rounded-bl-2xl">
+      <head>
+        <title>ShareBro</title>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="apple-touch-icon" href="/icons/send192.png" />
+      </head>
+      <body className="flex min-h-screen transition-all duration-300 sidebar-gradient rounded-tl-2xl rounded-bl-2xl">
         <Sidebar />
         <div className="flex flex-col flex-1">
           <Topbar />

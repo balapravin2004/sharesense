@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 /* --------------------- DROPDOWN MENU --------------------- */
 const DropdownMenu = ({ dropdownRef }) => (
   <div
-    className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 text-black overflow-hidden"
+    className="absolute right-0 top-5 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50 text-black overflow-hidden"
     ref={dropdownRef}>
     <ul className="flex flex-col">
       <Link href="/ProfilePage">
@@ -33,8 +33,10 @@ const DropdownMenu = ({ dropdownRef }) => (
 
 /* --------------------- MOBILE TOPBAR --------------------- */
 const TopbarMobile = ({ toggleDropdown, dropdownOpen, dropdownRef }) => (
-  <div className="w-full transition-all duration-300 sidebar-gradient text-white px-4 py-3 flex justify-between items-center sticky top-0 z-[100] md:hidden">
-    <div className="text-xl font-bold tracking-wide">Share Sense</div>
+  <div className="w-full transition-all duration-300 sidebar-gradient text-white px-4 py-3 flex justify-between items-center sticky top-0  md:hidden z-[200]">
+    <div className="text-xl font-bold tracking-wide">
+      <Link href="/">ShareBro</Link>
+    </div>
     <div className="flex items-center gap-5 relative">
       <button
         onClick={toggleDropdown}
@@ -50,8 +52,10 @@ const TopbarMobile = ({ toggleDropdown, dropdownOpen, dropdownRef }) => (
 
 /* --------------------- DESKTOP TOPBAR --------------------- */
 const TopbarDesktop = ({ toggleDropdown, dropdownOpen, dropdownRef }) => (
-  <div className="w-full transition-all duration-300 bg-transparent text-white px-4 py-3 flex justify-between items-center sticky top-0 z-[100] hidden md:flex">
-    <div className="text-xl font-bold tracking-wide">Share Sense</div>
+  <div className="w-full transition-all duration-300 bg-transparent text-white px-4 py-3  justify-between items-center sticky top-0  hidden md:flex">
+    <div className="text-xl font-bold tracking-wide">
+      <Link href="/">ShareBro</Link>
+    </div>
     <div className="flex items-center gap-5 relative">
       <button
         onClick={toggleDropdown}
