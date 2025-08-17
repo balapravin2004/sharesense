@@ -1,26 +1,27 @@
-import { readdir } from "fs/promises";
-import path from "path";
+// app/api/notesimages/route.js
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // 1. Path to the uploads folder
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-
-    // 2. Read all files in uploads folder
-    const files = await readdir(uploadDir);
-
-    // 3. Convert to public URLs
-    const images = files.map((file) => {
-      return `${process.env.NEXT_PUBLIC_BASE_URL}/uploads/${file}`;
+    // 1. Fetch all file records (only images)
+    const files = await prisma.file.findMany({
+      where: {
+        mimeType: { startsWith: "image/" }, // only images
+      },
+      orderBy: { createdAt: "desc" },
     });
 
-    // 4. Return list of image URLs
-    return NextResponse.json({ images });
+    // 2. Extract the Cloudinary URLs
+    const imageUrls = files.map((f) => f.url);
+
+    return NextResponse.json({ images: imageUrls });
   } catch (error) {
-    console.error("List error:", error);
+    console.error("Error fetching images:", error);
     return NextResponse.json(
-      { error: "Failed to fetch images" },
+      { error: "Error fetching images" },
       { status: 500 }
     );
   }
