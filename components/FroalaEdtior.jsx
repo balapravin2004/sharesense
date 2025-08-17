@@ -95,14 +95,12 @@ export default function FroalaEditor({ value, onChange, editorHeight }) {
       "video",
       "wordPaste",
     ],
-    events: {
-      "save.before": function (html) {
-        return false; // Prevent default save
-      },
-    },
     imageUploadURL: "/api/upload",
     imageUploadMethod: "POST",
     events: {
+      "save.before": function (html) {
+        return false;
+      },
       "image.inserted": function (img) {
         console.log("Image inserted:", img[0].src);
       },
