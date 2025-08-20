@@ -12,6 +12,7 @@ export default function RootLayout({ children }) {
       <head>
         <title>ShareBro</title>
         <link rel="manifest" href="/manifest.json" />
+        <meta name="google-site-verification" content="21_iy7WpXrCcI2HzzTOB7Rju6U4ZedGHPVqixOKJYjw" />
         <meta name="theme-color" content="#000000" />
         <link rel="apple-touch-icon" href="/icons/send192.png" />
       </head>
