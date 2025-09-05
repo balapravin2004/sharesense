@@ -2,18 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Lock, UserPlus, Settings, FileText } from "lucide-react";
+import { useSelector } from "react-redux";
 
 export default function BottomNavMobile() {
   const pathname = usePathname();
-
-  const navItems = [
-    { icon: Home, route: "/", label: "Home" },
-    { icon: FileText, route: "/AllNotesPage", label: "All Notes" },
-    { icon: Lock, route: "/SecureSharePage", label: "Secure Share" },
-    { icon: UserPlus, route: "/MakeRoomPage", label: "Make Room" },
-    { icon: Settings, route: "/SettingsPage", label: "Settings" },
-  ];
+  const navItems = useSelector((state) => state.ui.navItems);
 
   return (
     <div className="fixed bottom-0 left-0 w-full h-[4rem] bg-blue-900 text-white flex justify-around items-center md:hidden z-50 border-t border-blue-700 rounded-tr-2xl rounded-tl-2xl overflow-x-auto no-scrollbar">
