@@ -1,35 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  Lock,
-  UserPlus,
-  Settings,
-  PanelLeftClose,
-  PanelLeftOpen,
-  FileText,
-} from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import NavList from "./NavList";
 import LogoutButton from "./LogoutButton";
+import { toggleCollapse } from "../store/uiSlice";
 
 export default function SidebarDesktop() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const dispatch = useDispatch();
+  const collapsed = useSelector((state) => state.ui.collapsed);
+  const items = useSelector((state) => state.ui.navItems);
 
   const navItems = [
     {
       label: collapsed ? "Expand Sidebar" : "Collapse Sidebar",
       icon: collapsed ? PanelLeftOpen : PanelLeftClose,
-      action: () => setCollapsed(!collapsed),
+      action: () => dispatch(toggleCollapse()),
       isButton: true,
     },
-    { label: "Home", icon: Home, route: "/" },
-    { label: "All Notes", icon: FileText, route: "/AllNotesPage" },
-    { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
-    { label: "Make Room", icon: UserPlus, route: "/MakeRoomPage" },
-    { label: "Settings", icon: Settings, route: "/SettingsPage" },
+    ...items,
   ];
 
   return (
