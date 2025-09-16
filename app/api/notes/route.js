@@ -35,10 +35,9 @@ export async function GET() {
     });
 
     if (!lastNote) {
-      return new Response(
-        JSON.stringify({ error: "No notes found" }),
-        { status: 404 }
-      );
+      return new Response(JSON.stringify({ error: "No notes found" }), {
+        status: 404,
+      });
     }
 
     return new Response(JSON.stringify(lastNote), { status: 200 });
