@@ -17,7 +17,6 @@ const GeminiChatBot = () => {
 
     setMessages((prev) => [...prev, { from: "user", text: prompt }]);
     setPrompt("");
-
     setMessages((prev) => [...prev, { from: "bot", typing: true }]);
     setLoading(true);
 
@@ -62,6 +61,18 @@ const GeminiChatBot = () => {
         </motion.button>
       </div>
 
+      {/* Mobile Open Button */}
+      <div className="md:hidden fixed bottom-6 right-6 z-[300]">
+        <motion.button
+          onClick={() => setShowGemini(true)}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg">
+          <ChevronUp className="w-6 h-6" />
+        </motion.button>
+      </div>
+
       {/* Chat Popup */}
       <AnimatePresence>
         {showGemini && (
@@ -70,21 +81,24 @@ const GeminiChatBot = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className={`fixed bottom-6 right-6 z-[300] flex flex-col rounded-2xl shadow-2xl bg-white overflow-hidden
+            className={`fixed bottom-6 right-2 z-[300] flex flex-col rounded-2xl shadow-2xl bg-white overflow-hidden
               ${
-                fullscreen
-                  ? "w-[97vw] h-[97vh] bottom-0 right-0 rounded-xl"
+                fullscreen || window.innerWidth < 768
+                  ? "w-[97vw] h-[97vh] rounded-xl md:bottom-6 md:right-6"
                   : "w-80 h-[500px] md:w-96"
               }`}>
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 flex justify-between items-center">
               <h2 className="text-lg font-semibold">Gemini Chat</h2>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setFullscreen(!fullscreen)}
-                  className="hover:text-gray-300 transition">
-                  {fullscreen ? "🗗" : "🗖"}
-                </button>
+                {/* Fullscreen toggle only for desktop */}
+                {window.innerWidth >= 768 && (
+                  <button
+                    onClick={() => setFullscreen(!fullscreen)}
+                    className="hover:text-gray-300 transition">
+                    {fullscreen ? "🗗" : "🗖"}
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setFullscreen(false);
@@ -120,7 +134,7 @@ const GeminiChatBot = () => {
                         <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></span>
                       </div>
                     ) : (
-                      parse(m.text) // ✅ render Gemini's HTML/markup safely
+                      parse(m.text)
                     )}
                   </div>
                 </motion.div>
