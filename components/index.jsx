@@ -15,6 +15,7 @@ import SidebarDesktop from "./SidebarDesktop";
 import NotesMobileList from "./NotesMobileList";
 import BottomNavMobile from "./BottomNavMobile";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import GeminiChatBot from "./GeminiChatBot";
 //addin commne there
 export {
   Topbar,
@@ -28,6 +29,7 @@ export {
   NotesHeader,
   GeminiButton,
   FroalaEditor,
+  GeminiChatBot,
   LogoutButton,
   EditorsSection,
   SidebarDesktop,
