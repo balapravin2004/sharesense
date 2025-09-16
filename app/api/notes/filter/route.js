@@ -14,7 +14,7 @@ export async function POST(req) {
 
     if (mode === "general") {
       // Notes with no author
-      where = { authorId: null, global: 0 };
+      where = { authorId: null, isGlobal: false };
     } else if (mode === "user") {
       // Notes with authorId not null and isGlobal = false
       where = { authorId: { not: null }, isGlobal: false };
