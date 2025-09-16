@@ -89,7 +89,7 @@ const GeminiChatBot = () => {
               }`}>
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Gemini Chat</h2>
+              <h2 className="text-lg font-semibold">ShareBro Chat</h2>
               <div className="flex gap-2">
                 {/* Fullscreen toggle only for desktop */}
                 {window.innerWidth >= 768 && (
