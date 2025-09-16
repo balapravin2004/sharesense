@@ -2,23 +2,26 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-// Helper to save token in localStorage
-const saveToken = (token) => {
+// Helpers for localStorage
+const saveAuthData = (id, token) => {
+  localStorage.setItem("authId", id);
   localStorage.setItem("authToken", token);
 };
 
-// Helper to remove token from localStorage
-const removeToken = () => {
+const removeAuthData = () => {
+  localStorage.removeItem("authId");
   localStorage.removeItem("authToken");
-  console.log("Token removed on logout");
+  console.log("Token and ID removed on logout");
 };
 
-// Helper to get token from localStorage
-const getToken = () => {
-  return localStorage.getItem("authToken");
+const getAuthData = () => {
+  return {
+    id: localStorage.getItem("authId"),
+    token: localStorage.getItem("authToken"),
+  };
 };
 
-// Signup action - returns user and token same as login
+// Signup action
 export const signupUser = createAsyncThunk(
   "auth/signupUser",
   async (data, { rejectWithValue }) => {
@@ -56,14 +59,15 @@ export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
     console.error("Logout error:", error);
   }
   toast.success("Logged out successfully!");
-  removeToken();
+  removeAuthData();
   return null;
 });
 
-// Initial state with token from localStorage
+// Initial state
+const { id, token } = getAuthData();
 const initialState = {
-  user: null,
-  token: getToken(),
+  user: id ? { id } : null, // Only id is saved persistently; name and email are lost on refresh unless refetched
+  token: token,
   activeTab: "signup",
   loading: false,
   error: null,
@@ -88,7 +92,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        saveToken(action.payload.token); // ✅ Save token after signup
+        saveAuthData(action.payload.user.id, action.payload.token);
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
@@ -104,7 +108,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        saveToken(action.payload.token); // ✅ Save token after login
+        saveAuthData(action.payload.user.id, action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -115,10 +119,10 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.token = null;
-        removeToken(); // ✅ Clear token on logout
+        removeAuthData();
       });
   },
 });
-
+export const selectUser = (state) => state.auth.user;
 export const { setActiveTab } = authSlice.actions;
 export default authSlice.reducer;

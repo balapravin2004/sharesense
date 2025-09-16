@@ -25,7 +25,9 @@ export default function AllNotesPage() {
   useEffect(() => {
     if (notes.length === 0) dispatch(fetchAllNotes());
   }, [dispatch, notes.length]);
-
+  const getAllNotes = () => {
+    dispatch(fetchAllNotes);
+  };
   const previewText = (html) => {
     if (!html) return "";
     const stripped = html.replace(/<[^>]*>/g, "");
@@ -52,6 +54,7 @@ export default function AllNotesPage() {
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <NotesTable
               loading={loading}
+              fetchNotesFunction={getAllNotes}
               notes={filteredNotes}
               previewText={previewText}
               deletingId={deletingId}
@@ -62,6 +65,7 @@ export default function AllNotesPage() {
               notes={filteredNotes}
               previewText={previewText}
               deletingId={deletingId}
+              fetchNotesFunction={getAllNotes}
               onDelete={(id) => dispatch(setDeletingId(id))}
             />
           </div>
