@@ -1,22 +1,36 @@
-// app/api/notes/route.js
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {
-    const { content } = await req.json();
+    const body = await req.json();
+    console.log("Incoming payload:", body);
 
-    if (!content || content.trim() === "") {
+    const { content, mode, userId, userName } = body;
+
+    if (!content || !content.trim()) {
       return new Response(JSON.stringify({ error: "Content is required" }), {
         status: 400,
       });
     }
 
+    // Prepare note data
+    const noteData = {
+      content,
+      isGlobal: mode === "general" || mode === "both",
+      authorName: userName || null,
+      author: userId ? { connect: { id: userId } } : undefined,
+    };
+
+    if (mode === "user" && !userId) {
+      return new Response(JSON.stringify({ error: "User must be logged in" }), {
+        status: 400,
+      });
+    }
+
     const note = await prisma.note.create({
-      data: {
-        content,
-      },
+      data: noteData,
     });
 
     return new Response(JSON.stringify(note), { status: 201 });
@@ -35,10 +49,9 @@ export async function GET() {
     });
 
     if (!lastNote) {
-      return new Response(
-        JSON.stringify({ error: "No notes found" }),
-        { status: 404 }
-      );
+      return new Response(JSON.stringify({ error: "No notes found" }), {
+        status: 404,
+      });
     }
 
     return new Response(JSON.stringify(lastNote), { status: 200 });
