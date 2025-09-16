@@ -49,27 +49,55 @@ const notesSlice = createSlice({
     deletingId: null,
     query: "",
     showImages: false,
+    filterMode: "both", // general, user, or both
   },
   reducers: {
     setQuery: (state, action) => {
       state.query = action.payload;
       const q = state.query.trim().toLowerCase();
-      if (!q) {
-        state.filteredNotes = state.notes;
-      } else {
-        state.filteredNotes = state.notes.filter((n) =>
-          (n.content || "")
-            .replace(/<[^>]*>/g, "")
-            .toLowerCase()
-            .includes(q)
-        );
-      }
+      const filteredByQuery = !q
+        ? state.notes
+        : state.notes.filter((n) =>
+            (n.content || "")
+              .replace(/<[^>]*>/g, "")
+              .toLowerCase()
+              .includes(q)
+          );
+
+      state.filteredNotes = filteredByQuery.filter((note) => {
+        if (state.filterMode === "general") return note.isGlobal;
+        if (state.filterMode === "user") return !note.isGlobal;
+        return true; // both
+      });
     },
     toggleShowImages: (state) => {
       state.showImages = !state.showImages;
     },
     setDeletingId: (state, action) => {
       state.deletingId = action.payload;
+    },
+    setFilterMode: (state, action) => {
+      state.filterMode = action.payload;
+      // Reapply filtering based on query
+      const q = state.query.trim().toLowerCase();
+      const filteredByQuery = !q
+        ? state.notes
+        : state.notes.filter((n) =>
+            (n.content || "")
+              .replace(/<[^>]*>/g, "")
+              .toLowerCase()
+              .includes(q)
+          );
+
+      state.filteredNotes = filteredByQuery.filter((note) => {
+        if (state.filterMode === "general") return note.isGlobal;
+        if (state.filterMode === "user") return !note.isGlobal;
+        return true; // both
+      });
+    },
+    setFilteredNotes: (state, action) => {
+      // Directly set filteredNotes from API response
+      state.filteredNotes = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -79,7 +107,13 @@ const notesSlice = createSlice({
       })
       .addCase(fetchAllNotes.fulfilled, (state, action) => {
         state.notes = action.payload;
-        state.filteredNotes = action.payload;
+        // Apply filterMode initially
+        const filtered = state.notes.filter((note) => {
+          if (state.filterMode === "general") return note.isGlobal;
+          if (state.filterMode === "user") return !note.isGlobal;
+          return true;
+        });
+        state.filteredNotes = filtered;
         state.loading = false;
       })
       .addCase(fetchAllNotes.rejected, (state) => {
@@ -101,5 +135,12 @@ const notesSlice = createSlice({
   },
 });
 
-export const { setQuery, toggleShowImages, setDeletingId } = notesSlice.actions;
+export const {
+  setQuery,
+  toggleShowImages,
+  setDeletingId,
+  setFilterMode,
+  setFilteredNotes,
+} = notesSlice.actions;
+
 export default notesSlice.reducer;

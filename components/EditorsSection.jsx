@@ -23,7 +23,7 @@ export default function EditorsSection() {
     "px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-90 transition";
 
   const activeStyle =
-    "bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500";
+    "bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 border-2 border-black";
 
   // Save activeness to localStorage
   const handleSetActiveButton = (type) => {
