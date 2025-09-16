@@ -1,44 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  Lock,
-  UserPlus,
-  Settings,
-  PanelLeftClose,
-  PanelLeftOpen,
-  FileText,
-} from "lucide-react";
 import NavList from "./NavList";
 import LogoutButton from "./LogoutButton";
+import { getNavItems } from "../store/uiSlice"; // Import the selector/helper function
 
 export default function SidebarDesktop() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const dispatch = useDispatch();
+  const state = useSelector((state) => state.ui);
 
-  const navItems = [
-    {
-      label: collapsed ? "Expand Sidebar" : "Collapse Sidebar",
-      icon: collapsed ? PanelLeftOpen : PanelLeftClose,
-      action: () => setCollapsed(!collapsed),
-      isButton: true,
-    },
-    { label: "Home", icon: Home, route: "/" },
-    { label: "All Notes", icon: FileText, route: "/AllNotesPage" },
-    { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
-    { label: "Make Room", icon: UserPlus, route: "/MakeRoomPage" },
-    { label: "Settings", icon: Settings, route: "/SettingsPage" },
-  ];
+  // Get the nav items using the state and dispatch
+  const navItems = getNavItems(state, dispatch);
 
   return (
     <div
       className={`hidden md:flex h-screen text-white p-4 flex-col justify-between bg-transparent transition-all duration-300 ${
-        collapsed ? "w-20" : "w-60"
+        state.collapsed ? "w-20" : "w-60"
       }`}>
-      <NavList items={navItems} pathname={pathname} collapsed={collapsed} />
-      <LogoutButton collapsed={collapsed} />
+      <NavList
+        items={navItems}
+        pathname={pathname}
+        collapsed={state.collapsed}
+      />
+      <LogoutButton collapsed={state.collapsed} />
     </div>
   );
 }
