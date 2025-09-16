@@ -15,9 +15,15 @@ export default function EditorsSection() {
   const [content, setContent] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
-  const [activeButton, setActiveButton] = useState(
-    localStorage.getItem("activeButton") || "general"
-  );
+  const [activeButton, setActiveButton] = useState("general");
+
+  // ✅ Load activeButton from localStorage safely
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("activeButton");
+      if (stored) setActiveButton(stored);
+    }
+  }, []);
 
   const gradientBtn =
     "px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-90 transition";
@@ -28,7 +34,9 @@ export default function EditorsSection() {
   // Save activeness to localStorage
   const handleSetActiveButton = (type) => {
     setActiveButton(type);
-    localStorage.setItem("activeButton", type);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("activeButton", type);
+    }
     toast.success(`Active mode set to "${type}"`);
   };
 
