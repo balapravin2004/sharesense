@@ -1,8 +1,1 @@
-1. sperate page for saving content with autosave 
-2. share button in table
-3. sperate page for uploded images with share options only for related to content
-4. names for images also with search filter
-5. make it PWA
 6. file sharing feature with file upload progress with drag and drop feature 
-7. another upload button
-8. multiple select delete

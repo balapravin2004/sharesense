@@ -52,7 +52,7 @@ export default function GeminiChat() {
     <>
       {/* Open Button */}
       <GeminiButton setShowGemini={setShowGemini} />
-
+     
       {/* Chat Modal */}
       {showGemini && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[200] p-2">
