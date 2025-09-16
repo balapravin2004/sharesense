@@ -1,22 +1,38 @@
-// app/api/notes/route.js
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {
-    const { content } = await req.json();
+    const { content, mode, userId, userName } = await req.json();
 
-    if (!content || content.trim() === "") {
+    if (!content || !content.trim()) {
       return new Response(JSON.stringify({ error: "Content is required" }), {
         status: 400,
       });
     }
 
+    // Prepare note data
+    const noteData = { content };
+
+    if (userId) {
+      noteData.authorId = userId;
+      noteData.authorName = userName; // store name from client
+    }
+
+    // Mode logic
+    if (mode === "general") {
+      noteData.isGlobal = true;
+    } else if (mode === "both") {
+      noteData.isGlobal = true;
+    } else if (mode === "user" && !userId) {
+      return new Response(JSON.stringify({ error: "User must be logged in" }), {
+        status: 400,
+      });
+    }
+
     const note = await prisma.note.create({
-      data: {
-        content,
-      },
+      data: noteData,
     });
 
     return new Response(JSON.stringify(note), { status: 201 });
