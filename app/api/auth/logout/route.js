@@ -1,4 +1,15 @@
-export default function handler(req, res) {
-  res.setHeader("Set-Cookie", `token=; HttpOnly; Path=/; Max-Age=0`);
-  res.status(200).json({ message: "Logged out successfully" });
+// app/api/auth/logout/route.js
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  const response = NextResponse.json({ message: "Logged out successfully" });
+
+  // clear the cookie
+  response.cookies.set("token", "", {
+    httpOnly: true,
+    path: "/",
+    maxAge: 0,
+  });
+
+  return response;
 }
