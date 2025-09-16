@@ -9,6 +9,8 @@ import "./globals.css";
 import { Provider } from "react-redux";
 import { store } from "../store/store";
 
+import { GeminiChatBot } from "../components";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
@@ -28,6 +30,7 @@ export default function RootLayout({ children }) {
               {children}
             </main>
           </div>
+          <GeminiChatBot />;
         </Provider>
       </body>
     </html>
