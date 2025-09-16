@@ -59,7 +59,7 @@ export default function GeminiChat() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col h-[90vh] overflow-hidden">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Gemini Chat</h2>
+              <h2 className="text-lg font-semibold">ShareBro Chat</h2>
               <button onClick={() => setShowGemini(false)} className="text-xl">
                 ✖
               </button>
