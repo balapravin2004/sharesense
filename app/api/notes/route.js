@@ -4,7 +4,10 @@ const prisma = new PrismaClient();
 
 export async function POST(req) {
   try {
-    const { content, mode, userId, userName } = await req.json();
+    const body = await req.json();
+    console.log("Incoming payload:", body);
+
+    const { content, mode, userId, userName } = body;
 
     if (!content || !content.trim()) {
       return new Response(JSON.stringify({ error: "Content is required" }), {
@@ -13,19 +16,14 @@ export async function POST(req) {
     }
 
     // Prepare note data
-    const noteData = { content };
+    const noteData = {
+      content,
+      isGlobal: mode === "general" || mode === "both",
+      authorName: userName || null,
+      author: userId ? { connect: { id: userId } } : undefined,
+    };
 
-    if (userId) {
-      noteData.authorId = userId;
-      noteData.authorName = userName; // store name from client
-    }
-
-    // Mode logic
-    if (mode === "general") {
-      noteData.isGlobal = true;
-    } else if (mode === "both") {
-      noteData.isGlobal = true;
-    } else if (mode === "user" && !userId) {
+    if (mode === "user" && !userId) {
       return new Response(JSON.stringify({ error: "User must be logged in" }), {
         status: 400,
       });

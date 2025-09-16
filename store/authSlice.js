@@ -2,23 +2,29 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-// Helpers for localStorage
 const saveAuthData = (id, token) => {
-  localStorage.setItem("authId", id);
-  localStorage.setItem("authToken", token);
+  if (typeof window !== "undefined") {
+    localStorage.setItem("authId", id);
+    localStorage.setItem("authToken", token);
+  }
 };
 
 const removeAuthData = () => {
-  localStorage.removeItem("authId");
-  localStorage.removeItem("authToken");
-  console.log("Token and ID removed on logout");
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("authId");
+    localStorage.removeItem("authToken");
+    console.log("Token and ID removed on logout");
+  }
 };
 
 const getAuthData = () => {
-  return {
-    id: localStorage.getItem("authId"),
-    token: localStorage.getItem("authToken"),
-  };
+  if (typeof window !== "undefined") {
+    return {
+      id: localStorage.getItem("authId"),
+      token: localStorage.getItem("authToken"),
+    };
+  }
+  return { id: null, token: null };
 };
 
 // Signup action

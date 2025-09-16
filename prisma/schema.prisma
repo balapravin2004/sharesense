@@ -59,5 +59,6 @@ model Note {
   timing     DateTime @default(now())
   author     User?    @relation(fields: [authorId], references: [id])
   authorId   String?
-  authorName String?  // store user's name
+  authorName String?  // <-- store author's name
+  isGlobal   Boolean  @default(false) // <-- store general/both flag
 }
