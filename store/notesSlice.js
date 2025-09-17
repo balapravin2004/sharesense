@@ -43,8 +43,9 @@ export const deleteNote = createAsyncThunk(
 const notesSlice = createSlice({
   name: "notes",
   initialState: {
-    notes: [],
-    filteredNotes: [],
+    notes: [], // all notes from API
+    baseFilteredNotes: [], // filtered by filterMode but before query
+    filteredNotes: [], // what is shown on FE after query
     loading: false,
     deletingId: null,
     query: "",
@@ -53,51 +54,81 @@ const notesSlice = createSlice({
   },
   reducers: {
     setQuery: (state, action) => {
+      console.clear();
+      console.log("action.payload", action.payload);
+
       state.query = action.payload;
       const q = state.query.trim().toLowerCase();
-      const filteredByQuery = !q
-        ? state.notes
-        : state.notes.filter((n) =>
-            (n.content || "")
-              .replace(/<[^>]*>/g, "")
-              .toLowerCase()
-              .includes(q)
-          );
 
-      state.filteredNotes = filteredByQuery.filter((note) => {
-        if (state.filterMode === "general") return note.isGlobal;
-        if (state.filterMode === "user") return !note.isGlobal;
-        return true; // both
-      });
+      // Use baseFilteredNotes as source for query filtering
+      let temp = [...state.baseFilteredNotes];
+
+      if (q) {
+        temp = temp.filter((note) =>
+          (note.content || "")
+            .replace(/<[^>]*>/g, "")
+            .toLowerCase()
+            .includes(q)
+        );
+      }
+
+      state.filteredNotes = temp;
+      console.log("filteredNotes", state.filteredNotes);
     },
+
     toggleShowImages: (state) => {
       state.showImages = !state.showImages;
     },
+
     setDeletingId: (state, action) => {
       state.deletingId = action.payload;
     },
+
     setFilterMode: (state, action) => {
       state.filterMode = action.payload;
-      // Reapply filtering based on query
-      const q = state.query.trim().toLowerCase();
-      const filteredByQuery = !q
-        ? state.notes
-        : state.notes.filter((n) =>
-            (n.content || "")
-              .replace(/<[^>]*>/g, "")
-              .toLowerCase()
-              .includes(q)
-          );
 
-      state.filteredNotes = filteredByQuery.filter((note) => {
+      // Update baseFilteredNotes according to new filterMode
+      state.baseFilteredNotes = state.notes.filter((note) => {
         if (state.filterMode === "general") return note.isGlobal;
         if (state.filterMode === "user") return !note.isGlobal;
         return true; // both
       });
+
+      // Apply query on top of new baseFilteredNotes
+      const q = state.query.trim().toLowerCase();
+      let temp = [...state.baseFilteredNotes];
+      if (q) {
+        temp = temp.filter((note) =>
+          (note.content || "")
+            .replace(/<[^>]*>/g, "")
+            .toLowerCase()
+            .includes(q)
+        );
+      }
+      state.filteredNotes = temp;
     },
+
     setFilteredNotes: (state, action) => {
-      // Directly set filteredNotes from API response
-      state.filteredNotes = action.payload;
+      // Set all notes and baseFilteredNotes
+      state.notes = action.payload;
+      state.baseFilteredNotes = action.payload.filter((note) => {
+        if (state.filterMode === "general") return note.isGlobal;
+        if (state.filterMode === "user") return !note.isGlobal;
+        return true;
+      });
+
+      // Apply query on top
+      const q = state.query.trim().toLowerCase();
+      let temp = [...state.baseFilteredNotes];
+      if (q) {
+        temp = temp.filter((note) =>
+          (note.content || "")
+            .replace(/<[^>]*>/g, "")
+            .toLowerCase()
+            .includes(q)
+        );
+      }
+      state.filteredNotes = temp;
     },
   },
   extraReducers: (builder) => {
@@ -107,13 +138,27 @@ const notesSlice = createSlice({
       })
       .addCase(fetchAllNotes.fulfilled, (state, action) => {
         state.notes = action.payload;
-        // Apply filterMode initially
-        const filtered = state.notes.filter((note) => {
+
+        // Initialize baseFilteredNotes based on filterMode
+        state.baseFilteredNotes = state.notes.filter((note) => {
           if (state.filterMode === "general") return note.isGlobal;
           if (state.filterMode === "user") return !note.isGlobal;
           return true;
         });
-        state.filteredNotes = filtered;
+
+        // Apply query if any
+        const q = state.query.trim().toLowerCase();
+        let temp = [...state.baseFilteredNotes];
+        if (q) {
+          temp = temp.filter((note) =>
+            (note.content || "")
+              .replace(/<[^>]*>/g, "")
+              .toLowerCase()
+              .includes(q)
+          );
+        }
+        state.filteredNotes = temp;
+
         state.loading = false;
       })
       .addCase(fetchAllNotes.rejected, (state) => {
@@ -124,6 +169,9 @@ const notesSlice = createSlice({
       })
       .addCase(deleteNote.fulfilled, (state, action) => {
         state.notes = state.notes.filter((n) => n.id !== action.payload);
+        state.baseFilteredNotes = state.baseFilteredNotes.filter(
+          (n) => n.id !== action.payload
+        );
         state.filteredNotes = state.filteredNotes.filter(
           (n) => n.id !== action.payload
         );
