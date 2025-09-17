@@ -1,26 +1,56 @@
-// app/api/notes/filter/route.js
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+/**
+ * POST /api/notes/filter
+ * Body: { mode: "general" | "user" | "both", userId?: string }
+ */
 export async function POST(req) {
   try {
-    const body = await req.json();
-    console.log("Filter payload:", body);
-
-    const { mode } = body;
+    const { mode, userId } = await req.json();
+    console.log("Filter payload:", { mode, userId });
 
     let where = {};
 
-    if (mode === "general") {
-      // Notes with no author
-      where = { authorId: null, isGlobal: false };
-    } else if (mode === "user") {
-      // Notes with authorId not null and isGlobal = false
-      where = { authorId: { not: null }, isGlobal: false };
-    } else if (mode === "both") {
-      // Notes with authorId not null and isGlobal = true
-      where = { authorId: { not: null }, isGlobal: true };
+    switch (mode) {
+      case "general":
+        // Notes visible to everyone (guest)
+        where = { isGlobal: false, authorId: null };
+        break;
+
+      case "user":
+        // Only this user's private notes
+        if (!userId) {
+          return new Response(
+            JSON.stringify({ error: "userId required for user mode" }),
+            { status: 400 }
+          );
+        }
+        where = {
+          isGlobal: false,
+          authorId: userId,
+          authorName: { not: null },
+        };
+        break;
+
+      case "both":
+        // User’s global notes (isGlobal = true)
+        if (!userId) {
+          return new Response(
+            JSON.stringify({ error: "userId required for both mode" }),
+            { status: 400 }
+          );
+        }
+        where = {
+          isGlobal: true,
+          authorId: userId,
+          authorName: { not: null },
+        };
+        break;
+
+      default:
+        where = { isGlobal: false, authorId: null };
     }
 
     const notes = await prisma.note.findMany({
