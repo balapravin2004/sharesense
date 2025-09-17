@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Upload, Trash2, Loader2, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ShareModal from "./ShareModal";
+import axios from "axios";
 
 function timeAgo(timestamp) {
   if (!timestamp) return "—";
@@ -41,23 +42,22 @@ export default function NotesTable({
     if (selectedIds.length === 0) return;
     setBulkDeleting(true);
     try {
-      await fetch("/api/deletenotes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selectedIds }),
-      });
+      await axios.post("/api/deletenotes", { ids: selectedIds }); // ✅ delete
       setSelectedIds([]);
-      fetchNotesFunction();
+      await fetchNotesFunction(); // ✅ refetch fresh notes
     } catch (error) {
-      console.error("Error bulk deleting notes:", error);
+      console.error(
+        "Error bulk deleting notes:",
+        error.response?.data || error.message
+      );
     } finally {
       setBulkDeleting(false);
     }
   };
 
   return (
-    <div className="hidden md:block max-h-[32rem] xl:max-h-[40rem] overflow-auto border rounded-md">
-      <div className="flex justify-between items-center p-2 bg-gray-50 border-b">
+    <div className="hidden md:block max-h-[32rem] xl:max-h-[40rem] overflow-auto border rounded-md relative">
+      <div className="flex justify-between items-center p-2 bg-gray-50 border-b sticky top-0">
         <span className="text-sm text-gray-600">
           {selectedIds.length} selected
         </span>

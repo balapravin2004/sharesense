@@ -15,9 +15,15 @@ export default function EditorsSection() {
   const [content, setContent] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
-  const [activeButton, setActiveButton] = useState(
-    localStorage.getItem("activeButton") || "general"
-  );
+  const [activeButton, setActiveButton] = useState("general");
+
+  // ✅ Load activeButton from localStorage safely
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("activeButton");
+      if (stored) setActiveButton(stored);
+    }
+  }, []);
 
   const gradientBtn =
     "px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-90 transition";
@@ -28,7 +34,9 @@ export default function EditorsSection() {
   // Save activeness to localStorage
   const handleSetActiveButton = (type) => {
     setActiveButton(type);
-    localStorage.setItem("activeButton", type);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("activeButton", type);
+    }
     toast.success(`Active mode set to "${type}"`);
   };
 
@@ -112,27 +120,11 @@ export default function EditorsSection() {
     <div className="flex flex-col bg-white rounded-lg shadow p-3 gap-4">
       <FroalaEditor value={content} onChange={setContent} />
 
-      {isAuthenticated && (
-        <div className="flex justify-center gap-2 mb-4">
-          {["general", "both", "user"].map((type) => (
-            <button
-              key={type}
-              className={`${gradientBtn} ${
-                activeButton === type ? activeStyle : ""
-              }`}
-              onClick={() => handleSetActiveButton(type)}>
-              {type === "general"
-                ? "General"
-                : type === "both"
-                ? "Both"
-                : "User Only"}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="flex gap-2 justify-between items-center">
-        <div className="flex gap-2">
+      {/* Buttons line */}
+      {/* Buttons line */}
+      <div className="flex flex-row flex-wrap gap-4 md:justify-between">
+        {/* Row 1: Upload & Receive */}
+        <div className="flex gap-3">
           <button
             className={gradientBtn}
             onClick={handleUpload}
@@ -146,11 +138,36 @@ export default function EditorsSection() {
             disabled={isReceiving || isUploading}>
             {isReceiving ? "Receiving..." : "Receive"}
           </button>
+          {/* Row 3: View All */}
+          <Link
+            href="/AllNotesPage"
+            className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition w-fit">
+            View all
+          </Link>
         </div>
 
-        <Link href="/AllNotesPage" className={gradientBtn}>
-          View all
-        </Link>
+        {/* Row 2: Filters (only for authenticated users) */}
+        {isAuthenticated && (
+          <div className="flex gap-2 flex-wrap">
+            {["general", "both", "user"].map((type) => (
+              <button
+                key={type}
+                className={`px-3 py-1 rounded-full border text-sm font-medium transition
+            ${
+              activeButton === type
+                ? "bg-indigo-500 text-white border-indigo-500"
+                : "text-gray-600 border-gray-300 hover:bg-gray-100"
+            }`}
+                onClick={() => handleSetActiveButton(type)}>
+                {type === "general"
+                  ? "General"
+                  : type === "both"
+                  ? "Both"
+                  : "User Only"}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

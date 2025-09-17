@@ -3,10 +3,12 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 
+import { useRouter } from "next/navigation";
+
 const SignupForm = ({ onSubmit }) => {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
-
+  const router = useRouter();
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -18,6 +20,7 @@ const SignupForm = ({ onSubmit }) => {
       await onSubmit(form);
     } finally {
       setLoading(false);
+      router.replace("/");
     }
   };
 

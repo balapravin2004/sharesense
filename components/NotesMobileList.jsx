@@ -60,7 +60,7 @@ export default function NotesMobileList({
     <div className="md:hidden p-1 mb-14 md:mb-auto overflow-auto max-h-[30rem]">
       {/* Bulk delete header */}
       {selectedIds.length > 0 && (
-        <div className="flex justify-between items-center mb-3 p-2 bg-gray-50 border rounded">
+        <div className="flex justify-between items-center mb-3 p-2 bg-gray-50 border rounded  sticky top-[-1px]">
           <span className="text-sm text-gray-600">
             {selectedIds.length} selected
           </span>
