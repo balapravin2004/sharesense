@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useRef } from "react";
-import EditorsSection from "../components/EditorsSection";
-import FilesTable from "../components/FilesTable";
-import { GeminiButton } from "../components";
+
+import { GeminiButton,FilesTable,EditorsSection } from "../components";
 
 export default function Page() {
   const [files] = useState([

@@ -19,7 +19,7 @@ const prisma = new PrismaClient();
 function uploadBufferToCloudinary(buffer, folder = "sharesense/uploads") {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "image" },
+      { folder, resource_type: "auto" }, // auto handles images, pdfs, docs, etc.
       (err, result) => (err ? reject(err) : resolve(result))
     );
     stream.end(buffer);
@@ -28,43 +28,56 @@ function uploadBufferToCloudinary(buffer, folder = "sharesense/uploads") {
 
 export async function POST(req) {
   try {
-    // 1) Read the multipart form-data from Froala
+    // 1) Read multipart form-data
     const formData = await req.formData();
-    const file = formData.get("file");
-    if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    const files = formData.getAll("file"); // <-- multiple files
+    if (!files.length) {
+      return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
     }
 
-    // 2) Convert to Buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    let uploadedFiles = [];
 
-    // 3) Upload to Cloudinary
-    const upload = await uploadBufferToCloudinary(buffer);
-    const secureUrl = upload.secure_url; // CDN URL
-    const bytes = upload.bytes ?? buffer.length;
-    const format = upload.format
-      ? `image/${upload.format}`
-      : file.type || "image";
-    const originalName = file.name || upload.original_filename || "image";
+    // 2) Loop through all files
+    for (const file of files) {
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-    // 4) Save record to DB (File model)
-    // If you have auth, set uploadedById and isAnonymous=false accordingly.
-    await prisma.file.create({
-      data: {
-        filename: originalName,
-        mimeType: format,
-        size: bytes,
-        url: secureUrl, // <-- Cloudinary CDN URL saved here
-        uploadedById: null, // set user id if available
-        isAnonymous: true, // flip if you attach a user
-      },
-    });
+      // Upload to Cloudinary
+      const upload = await uploadBufferToCloudinary(buffer);
 
-    // 5) Return Froala-compatible response
-    return NextResponse.json({ link: secureUrl });
+      const secureUrl = upload.secure_url;
+      const bytes = upload.bytes ?? buffer.length;
+      const format = upload.format ? `image/${upload.format}` : file.type || "file";
+      const originalName = file.name || upload.original_filename || "file";
+
+      // Save to DB
+      await prisma.file.create({
+        data: {
+          filename: originalName,
+          mimeType: format,
+          size: bytes,
+          url: secureUrl,
+          uploadedById: null, // update if you use auth
+          isAnonymous: true,
+        },
+      });
+
+      uploadedFiles.push({ url: secureUrl, name: originalName, size: bytes });
+    }
+
+    // 3) Return all uploaded files
+    return NextResponse.json({ links: uploadedFiles }, { status: 200 });
+
   } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    console.error("Upload error details:", error);
+
+    // Return detailed error for debugging
+    return NextResponse.json(
+      {
+        error: error.message || "Upload failed",
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      },
+      { status: 500 }
+    );
   }
 }
