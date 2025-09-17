@@ -31,7 +31,7 @@ export default function AllNotesPage() {
   const fetchFilteredNotes = async (mode) => {
     try {
       setFetching(true);
-      const payload = { mode, userId: user?.id || null };
+      const payload = { mode, userId: user?.id || null, query }; // include query
 
       const res = await fetch("/api/notes/filter", {
         method: "POST",
@@ -71,12 +71,13 @@ export default function AllNotesPage() {
           <NotesHeader
             query={query}
             setQuery={(q) => dispatch(setQuery(q))}
+            NotesHeader
             onRefresh={() => fetchFilteredNotes(filterMode)} // ✅ pass refresh
           />
           <button
             onClick={() => dispatch(toggleShowImages())}
             className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mt-12">
-            <span className="hidden sm:inline">
+            <span className="text-[0.6rem] sm:text-lg">
               {showImages ? "Hide Images" : "See Images"}
             </span>
           </button>
@@ -98,7 +99,7 @@ export default function AllNotesPage() {
                   ? "General"
                   : type === "both"
                   ? "Both"
-                  : "User Only"}
+                  : "Your data"}
               </button>
             ))}
           </div>
