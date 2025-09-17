@@ -1,9 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import toast from "react-hot-toast";
-import { Image as ImageIcon, X } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  deleteNote,
+  setQuery,
+  toggleShowImages,
+  setDeletingId,
+  setFilteredNotes,
+} from "../../store/notesSlice";
 
 import NotesHeader from "../../components/NotesHeader";
 import NotesTable from "../../components/NotesTable";
@@ -12,61 +17,43 @@ import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import NotesImages from "../../components/NotesImages";
 
 export default function AllNotesPage() {
-  const [notes, setNotes] = useState([]);
-  const [filteredNotes, setFilteredNotes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [deleteId, setDeleteId] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
-  const [query, setQuery] = useState("");
-  const [showImages, setShowImages] = useState(false);
+  const dispatch = useDispatch();
+  const { filteredNotes, loading, deletingId, query, showImages } = useSelector(
+    (state) => state.notes
+  );
+  const user = useSelector((state) => state.auth.user);
 
-  const fetchAllNotes = async () => {
-    const toastId = toast.loading("Fetching notes...");
-    setLoading(true);
+  const [filterMode, setFilterMode] = useState(user ? "both" : "general"); // default general if not authenticated
+  const [fetching, setFetching] = useState(false);
+
+  // Fetch notes from API according to filterMode
+  const fetchFilteredNotes = async (mode) => {
     try {
-      const res = await axios.get("/api/allnotes");
-      const data = Array.isArray(res.data) ? res.data : res.data?.notes ?? [];
-      setNotes(data);
-      setFilteredNotes(data);
-      toast.success("Notes loaded", { id: toastId });
-    } catch (error) {
-      toast.error(error.response?.data?.error || "Error fetching notes", {
-        id: toastId,
+      setFetching(true);
+      const payload = { mode, userId: user?.id || 0 };
+      const res = await fetch("/api/notes/filter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchAllNotes();
-  }, []);
-
-  useEffect(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return setFilteredNotes(notes);
-
-    const filtered = notes.filter((n) => {
-      const text = (n.content || "").replace(/<[^>]*>/g, "").toLowerCase();
-      return text.includes(q);
-    });
-    setFilteredNotes(filtered);
-  }, [query, notes]);
-
-  const handleDelete = async (id) => {
-    setDeletingId(id);
-    try {
-      await axios.delete(`/api/deletenote/${id}`);
-      setNotes((prev) => prev.filter((n) => n.id !== id));
-      setFilteredNotes((prev) => prev.filter((n) => n.id !== id));
-      toast.success("Deleted successfully");
+      const data = await res.json();
+      if (res.ok) {
+        dispatch(setFilteredNotes(data));
+      } else {
+        console.error(data.error || "Failed to fetch notes");
+      }
     } catch (error) {
-      toast.error(error.response?.data?.error || "Error deleting note");
+      console.error("Error fetching notes:", error);
     } finally {
-      setDeletingId(null);
-      setDeleteId(null);
+      setFetching(false);
     }
   };
+
+  // Initial fetch + re-fetch when mode or user changes
+  useEffect(() => {
+    fetchFilteredNotes(filterMode);
+  }, [filterMode, user?.id]);
 
   const previewText = (html) => {
     if (!html) return "";
@@ -77,53 +64,68 @@ export default function AllNotesPage() {
   return (
     <div className="p-3 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto">
+        {/* Header + Image toggle */}
         <div className="flex items-center justify-between mb-4">
-          <NotesHeader
-            query={query}
-            setQuery={setQuery}
-            onRefresh={fetchAllNotes}
-          />
+          <NotesHeader query={query} setQuery={(q) => dispatch(setQuery(q))} />
           <button
-            onClick={() => setShowImages(!showImages)}
+            onClick={() => dispatch(toggleShowImages())}
             className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mt-12">
             <span className="hidden sm:inline">
               {showImages ? "Hide Images" : "See Images"}
             </span>
-
-            <span className="sm:hidden">
-              {showImages ? <X size={20} /> : <ImageIcon size={20} />}
-            </span>
           </button>
         </div>
 
+        {/* Filter buttons (only if user is authenticated) */}
+        {user && (
+          <div className="flex gap-2 justify-center mb-4">
+            {["general", "user", "both"].map((type) => (
+              <button
+                key={type}
+                className={`px-4 py-2 rounded-lg font-semibold border-2 transition ${
+                  filterMode === type
+                    ? "bg-blue-600 text-white border-blue-800"
+                    : "bg-gray-200 text-gray-800 border-gray-300"
+                }`}
+                onClick={() => setFilterMode(type)}>
+                {type === "general"
+                  ? "General"
+                  : type === "both"
+                  ? "Both"
+                  : "User Only"}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Notes display */}
         {showImages ? (
           <NotesImages visible={showImages} />
         ) : (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <NotesTable
-              loading={loading}
+              loading={loading || fetching}
               notes={filteredNotes}
               previewText={previewText}
               deletingId={deletingId}
-              onDelete={(id) => setDeleteId(id)}
-              fetchNotesFunction={fetchAllNotes}
+              onDelete={(id) => dispatch(setDeletingId(id))}
             />
             <NotesMobileList
-              loading={loading}
+              loading={loading || fetching}
               notes={filteredNotes}
               previewText={previewText}
               deletingId={deletingId}
-              onDelete={(id) => setDeleteId(id)}
-              fetchNotesFunction={fetchAllNotes}
+              onDelete={(id) => dispatch(setDeletingId(id))}
             />
           </div>
         )}
 
-        {deleteId && (
+        {/* Confirm delete modal */}
+        {deletingId && (
           <ConfirmDeleteModal
-            onCancel={() => setDeleteId(null)}
-            onConfirm={() => handleDelete(deleteId)}
-            deletingId={deletingId === deleteId}
+            onCancel={() => dispatch(setDeletingId(null))}
+            onConfirm={() => dispatch(deleteNote(deletingId))}
+            deletingId={deletingId}
           />
         )}
       </div>

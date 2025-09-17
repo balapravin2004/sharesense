@@ -78,7 +78,7 @@ export default function NotesImages({ visible }) {
         ) : images.length === 0 ? (
           <p className="text-gray-500">No images found</p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
             {images.map((img, idx) => (
               <div
                 key={idx}
