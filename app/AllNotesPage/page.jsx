@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  deleteNote,
   setQuery,
-  toggleShowImages,
+  deleteNote,
   setDeletingId,
   setFilteredNotes,
+  toggleShowImages,
 } from "../../store/notesSlice";
 
 import NotesHeader from "../../components/NotesHeader";
@@ -18,19 +18,20 @@ import NotesImages from "../../components/NotesImages";
 
 export default function AllNotesPage() {
   const dispatch = useDispatch();
-  const { filteredNotes, loading, deletingId, query, showImages } = useSelector(
-    (state) => state.notes
-  );
+  const { filteredNotes, loading, deletingId, query, showImages } =
+    useSelector((state) => state.notes);
   const user = useSelector((state) => state.auth.user);
 
-  const [filterMode, setFilterMode] = useState(user ? "both" : "general"); // default general if not authenticated
+  // Guests see general by default, logged-in sees both
+  const [filterMode, setFilterMode] = useState(user ? "both" : "general");
   const [fetching, setFetching] = useState(false);
 
   // Fetch notes from API according to filterMode
   const fetchFilteredNotes = async (mode) => {
     try {
       setFetching(true);
-      const payload = { mode, userId: user?.id || 0 };
+      const payload = { mode, userId: user?.id || null };
+
       const res = await fetch("/api/notes/filter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,7 +51,7 @@ export default function AllNotesPage() {
     }
   };
 
-  // Initial fetch + re-fetch when mode or user changes
+  // Initial fetch + re-fetch when filterMode or user changes
   useEffect(() => {
     fetchFilteredNotes(filterMode);
   }, [filterMode, user?.id]);
@@ -69,7 +70,8 @@ export default function AllNotesPage() {
           <NotesHeader query={query} setQuery={(q) => dispatch(setQuery(q))} />
           <button
             onClick={() => dispatch(toggleShowImages())}
-            className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mt-12">
+            className="ml-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mt-12"
+          >
             <span className="hidden sm:inline">
               {showImages ? "Hide Images" : "See Images"}
             </span>
@@ -87,7 +89,8 @@ export default function AllNotesPage() {
                     ? "bg-blue-600 text-white border-blue-800"
                     : "bg-gray-200 text-gray-800 border-gray-300"
                 }`}
-                onClick={() => setFilterMode(type)}>
+                onClick={() => setFilterMode(type)}
+              >
                 {type === "general"
                   ? "General"
                   : type === "both"
