@@ -30,7 +30,7 @@ export default function RootLayout({ children }) {
               {children}
             </main>
           </div>
-          <GeminiChatBot />;
+          <GeminiChatBot />
         </Provider>
       </body>
     </html>

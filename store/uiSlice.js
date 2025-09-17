@@ -36,7 +36,7 @@ export const getNavItems = (state, dispatch) => [
   { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
   { label: "Make Room", icon: UserPlus, route: "/MakeRoomPage" },
   { label: "Settings", icon: Settings, route: "/SettingsPage" },
-  { label: "Auth", icon: LogIn, route: "/auth" }, // ✅ Added Auth route
+  { label: "Login", icon: LogIn, route: "/auth" }, // ✅ Added Auth route
 ];
 
 export const { toggleCollapse } = uiSlice.actions;

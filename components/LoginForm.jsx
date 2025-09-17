@@ -5,12 +5,13 @@ import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../store/authSlice"; // adjust path
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-
+  const router = useRouter();
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -23,6 +24,7 @@ const LoginForm = () => {
       const resAction = await dispatch(loginUser(form));
       if (loginUser.fulfilled.match(resAction)) {
         toast.success("Logged in successfully!");
+        router.replace("/");
       } else {
         toast.error(resAction.payload || "Login failed");
       }
