@@ -80,7 +80,7 @@ export default function NotePage() {
       {/* Floating Back Button */}
       <button
         onClick={() => router.push("/AllNotesPage")}
-        className="z-[100] fixed bottom-[4rem] md:bottom-12 right-4 md:right-8 
+        className="z-[100] fixed bottom-[4rem] md:bottom-12 left-4 md:left-[280px] 
                    w-12 h-12 flex items-center justify-center 
                    rounded-full bg-blue-600 text-white shadow-lg 
                    hover:bg-blue-700 transition"

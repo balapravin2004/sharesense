@@ -54,9 +54,11 @@ model Notification {
 }
 
 model Note {
-  id        String   @id @default(cuid())
-  content   String
-  timing    DateTime @default(now())
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
+  id         String   @id @default(cuid())
+  content    String
+  timing     DateTime @default(now())
+  author     User?    @relation(fields: [authorId], references: [id])
+  authorId   String?
+  authorName String?  // <-- store author's name
+  isGlobal   Boolean  @default(false) // <-- store general/both flag
 }
