@@ -15,7 +15,7 @@ export default function BottomNavMobile() {
 
   return (
     <div className="fixed bottom-0 left-0 w-full h-[4rem] bg-blue-900 text-white flex justify-around items-center md:hidden z-50 border-t border-blue-700 rounded-tr-2xl rounded-tl-2xl overflow-x-auto no-scrollbar">
-      {navItems.map((item, idx) => {
+      {navItems.slice(1).map((item, idx) => {
         const isActive = pathname === item.route;
         const Icon = item.icon;
 
