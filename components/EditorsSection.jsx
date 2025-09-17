@@ -120,41 +120,45 @@ export default function EditorsSection() {
     <div className="flex flex-col bg-white rounded-lg shadow p-3 gap-4">
       <FroalaEditor value={content} onChange={setContent} />
 
-      {isAuthenticated && (
-        <div className="flex justify-center gap-2 mb-4">
-          {["general", "both", "user"].map((type) => (
-            <button
-              key={type}
-              className={`${gradientBtn} ${
-                activeButton === type ? activeStyle : ""
-              }`}
-              onClick={() => handleSetActiveButton(type)}>
-              {type === "general"
-                ? "General"
-                : type === "both"
-                ? "Both"
-                : "User Only"}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="flex gap-2 justify-between items-center">
+      {/* Buttons line */}
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <div className="flex gap-2">
           <button
             className={gradientBtn}
             onClick={handleUpload}
-            disabled={isUploading || isReceiving}>
+            disabled={isUploading || isReceiving}
+          >
             {isUploading ? "Uploading..." : "Upload"}
           </button>
 
           <button
             className={gradientBtn}
             onClick={handleReceive}
-            disabled={isReceiving || isUploading}>
+            disabled={isReceiving || isUploading}
+          >
             {isReceiving ? "Receiving..." : "Receive"}
           </button>
         </div>
+
+        {isAuthenticated && (
+          <div className="flex gap-2">
+            {["general", "both", "user"].map((type) => (
+              <button
+                key={type}
+                className={`${gradientBtn} ${
+                  activeButton === type ? activeStyle : ""
+                }`}
+                onClick={() => handleSetActiveButton(type)}
+              >
+                {type === "general"
+                  ? "General"
+                  : type === "both"
+                  ? "Both"
+                  : "User Only"}
+              </button>
+            ))}
+          </div>
+        )}
 
         <Link href="/AllNotesPage" className={gradientBtn}>
           View all

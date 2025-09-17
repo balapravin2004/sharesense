@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-
 const prisma = new PrismaClient();
 
 export async function POST(req) {
@@ -7,7 +6,7 @@ export async function POST(req) {
     const body = await req.json();
     console.log("Incoming payload:", body);
 
-    const { content, mode, userId, userName } = body;
+    const { content, mode: rawMode, userId, userName } = body;
 
     if (!content || !content.trim()) {
       return new Response(JSON.stringify({ error: "Content is required" }), {
@@ -15,24 +14,26 @@ export async function POST(req) {
       });
     }
 
-    // Prepare note data
-    const noteData = {
-      content,
-      isGlobal: mode === "general" || mode === "both",
-      authorName: userName || null,
-      author: userId ? { connect: { id: userId } } : undefined,
-    };
+    // Decide the real mode
+    const effectiveMode =
+      !userId || rawMode === "general" ? "general" : rawMode;
 
-    if (mode === "user" && !userId) {
-      return new Response(JSON.stringify({ error: "User must be logged in" }), {
-        status: 400,
-      });
+    // Prepare note data
+    let noteData = { content };
+
+    if (effectiveMode === "general") {
+      noteData.isGlobal = false; // or true if you want it visible to all
+    } else if (effectiveMode === "user") {
+      noteData.isGlobal = false;
+      noteData.authorName = userName ?? null;
+      noteData.author = { connect: { id: userId } };
+    } else if (effectiveMode === "both") {
+      noteData.isGlobal = true;
+      noteData.authorName = userName ?? null;
+      noteData.author = { connect: { id: userId } };
     }
 
-    const note = await prisma.note.create({
-      data: noteData,
-    });
-
+    const note = await prisma.note.create({ data: noteData });
     return new Response(JSON.stringify(note), { status: 201 });
   } catch (error) {
     console.error("Error saving note:", error);
@@ -41,7 +42,6 @@ export async function POST(req) {
     });
   }
 }
-
 export async function GET() {
   try {
     const lastNote = await prisma.note.findFirst({
@@ -53,7 +53,6 @@ export async function GET() {
         status: 404,
       });
     }
-
     return new Response(JSON.stringify(lastNote), { status: 200 });
   } catch (error) {
     console.error("Error fetching note:", error);
