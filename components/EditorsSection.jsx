@@ -121,35 +121,44 @@ export default function EditorsSection() {
       <FroalaEditor value={content} onChange={setContent} />
 
       {/* Buttons line */}
-      <div className="flex flex-wrap justify-between items-center gap-3">
-        <div className="flex gap-2">
+      {/* Buttons line */}
+      <div className="flex flex-row flex-wrap gap-4 md:justify-between">
+        {/* Row 1: Upload & Receive */}
+        <div className="flex gap-3">
           <button
             className={gradientBtn}
             onClick={handleUpload}
-            disabled={isUploading || isReceiving}
-          >
+            disabled={isUploading || isReceiving}>
             {isUploading ? "Uploading..." : "Upload"}
           </button>
 
           <button
             className={gradientBtn}
             onClick={handleReceive}
-            disabled={isReceiving || isUploading}
-          >
+            disabled={isReceiving || isUploading}>
             {isReceiving ? "Receiving..." : "Receive"}
           </button>
+          {/* Row 3: View All */}
+          <Link
+            href="/AllNotesPage"
+            className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition w-fit">
+            View all
+          </Link>
         </div>
 
+        {/* Row 2: Filters (only for authenticated users) */}
         {isAuthenticated && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {["general", "both", "user"].map((type) => (
               <button
                 key={type}
-                className={`${gradientBtn} ${
-                  activeButton === type ? activeStyle : ""
-                }`}
-                onClick={() => handleSetActiveButton(type)}
-              >
+                className={`px-3 py-1 rounded-full border text-sm font-medium transition
+            ${
+              activeButton === type
+                ? "bg-indigo-500 text-white border-indigo-500"
+                : "text-gray-600 border-gray-300 hover:bg-gray-100"
+            }`}
+                onClick={() => handleSetActiveButton(type)}>
                 {type === "general"
                   ? "General"
                   : type === "both"
@@ -159,10 +168,6 @@ export default function EditorsSection() {
             ))}
           </div>
         )}
-
-        <Link href="/AllNotesPage" className={gradientBtn}>
-          View all
-        </Link>
       </div>
     </div>
   );
