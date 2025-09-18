@@ -29,7 +29,9 @@ export default function NotesHeader({ query, setQuery, onRefresh }) {
           </div>
 
           <button
-            onClick={onRefresh}
+            onClick={() => {
+              onRefresh();
+            }}
             className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
             aria-label="Refresh notes">
             <RefreshCw className="w-4 h-4" />

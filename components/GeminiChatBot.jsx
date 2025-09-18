@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUp, X } from "lucide-react";
+import { ChevronUp, X, ChevronLeft } from "lucide-react";
 
 const GeminiChatBot = () => {
   const [showGemini, setShowGemini] = useState(false);
@@ -62,14 +62,14 @@ const GeminiChatBot = () => {
       </div>
 
       {/* Mobile Open Button */}
-      <div className="md:hidden fixed bottom-6 right-6 z-[300]">
+      <div className="md:hidden fixed bottom-[4rem] right-[-1.1rem] z-[300]">
         <motion.button
           onClick={() => setShowGemini(true)}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg">
-          <ChevronUp className="w-6 h-6" />
+          <ChevronLeft className="w-6 h-6" />
         </motion.button>
       </div>
 
@@ -81,7 +81,7 @@ const GeminiChatBot = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-           className={`fixed z-[300] flex flex-col bg-white overflow-hidden shadow-2xl
+            className={`fixed z-[300] flex flex-col bg-white overflow-hidden shadow-2xl
             rounded-2xl
             bottom-4 right-4
             w-[90vw] h-[90vh]
@@ -112,22 +112,22 @@ const GeminiChatBot = () => {
             </div>
 
             {/* Chat Messages */}
-           <div className="flex-1 p-4 space-y-3 overflow-y-auto bg-gray-100">
+            <div className="flex-1 p-4 space-y-3 overflow-y-auto bg-gray-100">
               {messages.map((m, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
-                  className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}
-                >
+                  className={`flex ${
+                    m.from === "user" ? "justify-end" : "justify-start"
+                  }`}>
                   <div
                     className={`px-4 py-2 rounded-2xl max-w-[80%] text-sm shadow break-words whitespace-pre-wrap ${
                       m.from === "user"
                         ? "bg-blue-500 text-white rounded-br-none"
                         : "bg-white text-gray-800 rounded-bl-none"
-                    }`}
-                  >
+                    }`}>
                     {m.typing ? (
                       <div className="flex space-x-1">
                         <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
@@ -139,13 +139,21 @@ const GeminiChatBot = () => {
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
-                            code({ node, inline, className, children, ...props }) {
+                            code({
+                              node,
+                              inline,
+                              className,
+                              children,
+                              ...props
+                            }) {
                               return !inline ? (
                                 <pre className="bg-gray-800 text-white p-2 rounded-lg overflow-x-auto">
                                   <code {...props}>{children}</code>
                                 </pre>
                               ) : (
-                                <code className="bg-gray-100 px-1 rounded" {...props}>
+                                <code
+                                  className="bg-gray-100 px-1 rounded"
+                                  {...props}>
                                   {children}
                                 </code>
                               );
@@ -160,8 +168,7 @@ const GeminiChatBot = () => {
                                 />
                               );
                             },
-                          }}
-                        >
+                          }}>
                           {m.text}
                         </ReactMarkdown>
                       </div>

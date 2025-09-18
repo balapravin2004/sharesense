@@ -33,7 +33,7 @@ export const signupUser = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await axios.post("/api/auth/signup", data);
-      toast.success("Signup successful! Logging you in...");
+      toast.success("Signup successful! 😄😄");
       return { user: res.data.user, token: res.data.token };
     } catch (error) {
       toast.error(error.response?.data?.error || "Signup failed");
@@ -59,11 +59,6 @@ export const loginUser = createAsyncThunk(
 
 // Logout action
 export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
-  try {
-    await axios.post("/api/auth/logout");
-  } catch (error) {
-    console.error("Logout error:", error);
-  }
   toast.success("Logged out successfully!");
   removeAuthData();
   return null;
