@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && tsc server.mts --outDir dist",
+    "build": "next build && tsc -p tsconfig.server.json",
     "start": "node dist/server.mjs"
   },
   "dependencies": {
