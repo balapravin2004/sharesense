@@ -84,7 +84,7 @@ export default function ChatPage() {
       {!currentRoom ? (
         <>
           {/* Left Side: Join Form */}
-          <div className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto md:mx-0">
+          <div className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-lg shadow-lg md:max-w-md mx-auto md:mx-0 border border-none w-full">
             <h2 className="text-2xl font-bold text-center text-blue-600">
               Join a Chat Room
             </h2>
@@ -98,8 +98,8 @@ export default function ChatPage() {
           </div>
 
           {/* Right Side: Active Rooms */}
-          <div className="flex-1 flex flex-col gap-4 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto md:mx-0">
-            <h3 className="text-xl font-semibold text-gray-700">
+          <div className="flex-1 flex flex-col gap-4 p-4 bg-white rounded-lg shadow-lg w-full max-h-[80vh] overflow-auto">
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
               Active Rooms ({activeRooms.length})
             </h3>
             <ActiveRooms rooms={activeRooms} />

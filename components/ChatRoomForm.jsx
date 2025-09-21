@@ -27,7 +27,7 @@ export default function ChatRoomForm({
       />
       <button
         onClick={onJoin}
-        className="sidebar-gradient text-white font-semibold py-2 rounded shadow w-full">
+        className="sidebar-gradient text-white font-semibold py-2 shadow w-full rounded-md">
         Join Room
       </button>
     </div>
