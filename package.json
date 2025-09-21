@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && tsc -p tsconfig.server.json",
-    "start": "node dist/server.mjs"
+    "build": "next build && tsc server.mts --outDir dist",
+    "start": "next start",
+    "dev:socket": "ts-node server.mts",
+    "start:socket": "node dist/server.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
