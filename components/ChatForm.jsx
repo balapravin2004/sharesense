@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-const ChatForm = ({ onSendMessage }) => {
+export default function ChatForm({ onSendMessage }) {
   const [text, setText] = useState("");
 
   const handleSubmit = (e) => {
@@ -13,7 +13,7 @@ const ChatForm = ({ onSendMessage }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 border-t pt-2">
+    <form onSubmit={handleSubmit} className="flex gap-2">
       <input
         type="text"
         value={text}
@@ -23,11 +23,9 @@ const ChatForm = ({ onSendMessage }) => {
       />
       <button
         type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
         Send
       </button>
     </form>
   );
-};
-
-export default ChatForm;
+}

@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import next from "next";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.HOSTNAME || "0.0.0.0";
@@ -9,48 +9,115 @@ const port = parseInt(process.env.PORT || "3000", 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-app.prepare().then(() => {
-  const httpServer = createServer((req, res) => {
-    handle(req, res);
-  });
+interface ActiveRooms {
+  [room: string]: Set<string>;
+}
 
-  // ✅ Add CORS so frontend can connect
+app.prepare().then(() => {
+  const httpServer = createServer((req, res) => handle(req, res));
+
   const io = new Server(httpServer, {
     cors: {
-      origin: "*", // in prod use your frontend domain
+      origin: "*", // replace with your frontend URL in production
       methods: ["GET", "POST"],
     },
   });
 
-  io.on("connection", (socket) => {
+  // Track rooms and users
+  const activeRooms: ActiveRooms = {};
+
+  io.on("connection", (socket: Socket) => {
     console.log(`✅ User connected: ${socket.id}`);
 
-    // log every event from this client
-    socket.onAny((event, ...args) => {
-      console.log("📡 Event received:", event, args);
+    socket.onAny((event, ...args) => console.log("📡 Event:", event, args));
+
+    // Join room
+    socket.on(
+      "join-room",
+      (
+        { room, username }: { room: string; username: string },
+        ack?: (response: { ok: boolean }) => void
+      ) => {
+        socket.join(room);
+
+        if (!activeRooms[room]) activeRooms[room] = new Set();
+        activeRooms[room].add(socket.id);
+
+        // Notify room
+        socket.to(room).emit("user_joined", username);
+        socket.emit("user_joined", username);
+
+        // Emit updated active rooms
+        const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
+          room: r,
+          users: users.size,
+        }));
+        io.emit("active_rooms", roomsInfo);
+
+        if (ack) ack({ ok: true });
+      }
+    );
+
+    // Leave room
+    socket.on(
+      "leave-room",
+      ({ room, username }: { room: string; username?: string }) => {
+        socket.leave(room);
+
+        if (activeRooms[room]) {
+          activeRooms[room].delete(socket.id);
+          if (activeRooms[room].size === 0) delete activeRooms[room];
+        }
+
+        if (username) socket.to(room).emit("user_left", username);
+
+        const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
+          room: r,
+          users: users.size,
+        }));
+        io.emit("active_rooms", roomsInfo);
+      }
+    );
+
+    // Chat message
+    socket.on(
+      "message",
+      ({
+        room,
+        sender,
+        message,
+      }: {
+        room: string;
+        sender: string;
+        message: string;
+      }) => {
+        io.to(room).emit("message", { sender, message });
+      }
+    );
+
+    // Disconnecting cleanup
+    socket.on("disconnecting", () => {
+      for (const room of socket.rooms) {
+        if (room === socket.id) continue; // skip default room
+        if (activeRooms[room]) {
+          activeRooms[room].delete(socket.id);
+          if (activeRooms[room].size === 0) delete activeRooms[room];
+        }
+      }
     });
 
-    // when someone joins a room
-    socket.on("join-room", ({ room, username }, ack) => {
-      console.log("🧭 server received join-room", { room, username });
-      socket.join(room);
-      console.log(`👤 ${username} joined room: ${room}`);
-      socket.to(room).emit("user_joined", username);
-      socket.emit("user_joined", username);
-      if (ack) ack({ ok: true });
-    });
-
-    // chat message
-    socket.on("message", ({ room, sender, message }) => {
-      io.to(room).emit("message", { sender, message });
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log(`❌ User disconnected: ${socket.id} (reason: ${reason})`);
+    // On disconnect
+    socket.on("disconnect", () => {
+      const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
+        room: r,
+        users: users.size,
+      }));
+      io.emit("active_rooms", roomsInfo);
+      console.log(`❌ User disconnected: ${socket.id}`);
     });
   });
 
-  httpServer.listen(port, () => {
-    console.log(`🚀 Server is running on http://${hostname}:${port}`);
-  });
+  httpServer.listen(port, () =>
+    console.log(`🚀 Server running on http://${hostname}:${port}`)
+  );
 });

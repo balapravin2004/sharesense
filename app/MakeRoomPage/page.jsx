@@ -1,118 +1,119 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { ChatForm, ChatMessage } from "../../components";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { socket } from "../../lib/socketClient";
+import {
+  addMessage,
+  setActiveRooms,
+  setCurrentRoom,
+} from "../../store/chatSlice";
 
-const Page = () => {
-  const [room, setRoom] = useState("");
-  const [joined, setJoined] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [userName, setUserName] = useState("");
+import { ChatRoomForm, ActiveRooms, ChatWindow } from "../../components/index";
 
-  // send message
+export default function ChatPage() {
+  const dispatch = useDispatch();
+  const { currentRoom, messages, activeRooms } = useSelector(
+    (state) => state.chat
+  );
+
+  const [localName, setLocalName] = useState("");
+  const [roomInput, setRoomInput] = useState("");
+
+  const handleJoinRoom = () => {
+    if (!roomInput || !localName) return;
+    socket.emit("join-room", { room: roomInput, username: localName });
+    dispatch(setCurrentRoom(roomInput));
+  };
+
+  const handleLeaveRoom = () => {
+    if (!currentRoom) return;
+    socket.emit("leave-room", { room: currentRoom });
+    dispatch(setCurrentRoom(null));
+  };
+
   const handleSendMessage = (msg) => {
-    const newMsg = {
-      sender: userName || "Anonymous",
+    if (!msg.trim() || !currentRoom) return;
+    socket.emit("message", {
+      room: currentRoom,
+      sender: localName,
       message: msg,
-      isOwnMessage: true,
-    };
-
-    // show locally
-    setMessages((prev) => [...prev, newMsg]);
-
-    // send to server
-    socket.emit("message", { room, ...newMsg });
+    });
+    dispatch(
+      addMessage({
+        room: currentRoom,
+        message: { sender: localName, message: msg, isOwnMessage: true },
+      })
+    );
   };
 
   useEffect(() => {
-    // system: when someone joins
-    socket.on("user_joined", (username) => {
-      setMessages((prev) => [
-        ...prev,
-        { sender: "system", message: `${username} joined the room` },
-      ]);
+    socket.on("message", (data) => {
+      dispatch(
+        addMessage({
+          room: data.room || currentRoom,
+          message: { sender: data.sender, message: data.message },
+        })
+      );
     });
 
-    // user message from server
-    socket.on("message", (data) => {
-      setMessages((prev) => [
-        ...prev,
-        { sender: data.sender, message: data.message, isOwnMessage: false },
-      ]);
+    socket.on("user_joined", (username) => {
+      dispatch(
+        addMessage({
+          room: currentRoom,
+          message: {
+            sender: "system",
+            message: `${username} joined`,
+            highlight: true,
+          },
+        })
+      );
     });
+
+    socket.on("active_rooms", (rooms) => dispatch(setActiveRooms(rooms)));
 
     return () => {
-      socket.off("user_joined");
       socket.off("message");
+      socket.off("user_joined");
+      socket.off("active_rooms");
     };
-  }, []);
-
-  // join room
-  const handleJoinRoom = () => {
-    if (!room || !userName) return;
-    console.log("→ emitting join-room", { room, username: userName });
-    socket.emit("join-room", { room, username: userName }, (ack) => {
-      console.log("← join-room ack:", ack);
-    });
-    setJoined(true);
-  };
+  }, [currentRoom]);
 
   return (
-    <div className="w-full p-4 border bg-white h-[90vh]">
-      {!joined ? (
-        <div className="flex flex-col gap-2">
-          <input
-            type="text"
-            placeholder="Enter your name"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            className="border px-3 py-2 rounded"
-          />
-          <input
-            type="text"
-            placeholder="Enter room name"
-            value={room}
-            onChange={(e) => setRoom(e.target.value)}
-            className="border px-3 py-2 rounded"
-          />
-          <button
-            onClick={handleJoinRoom}
-            className="bg-green-500 text-white px-4 py-2 rounded">
-            Join Room
-          </button>
-        </div>
+    <div className="w-full min-h-[90vh] flex flex-col md:flex-row p-4 md:p-6 bg-gray-50 gap-6">
+      {!currentRoom ? (
+        <>
+          {/* Left Side: Join Form */}
+          <div className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto md:mx-0">
+            <h2 className="text-2xl font-bold text-center text-blue-600">
+              Join a Chat Room
+            </h2>
+            <ChatRoomForm
+              localName={localName}
+              setLocalName={setLocalName}
+              roomInput={roomInput}
+              setRoomInput={setRoomInput}
+              onJoin={handleJoinRoom}
+            />
+          </div>
+
+          {/* Right Side: Active Rooms */}
+          <div className="flex-1 flex flex-col gap-4 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto md:mx-0">
+            <h3 className="text-xl font-semibold text-gray-700">
+              Active Rooms ({activeRooms.length})
+            </h3>
+            <ActiveRooms rooms={activeRooms} />
+          </div>
+        </>
       ) : (
-        <div className="flex flex-col h-[400px]">
-          {/* Show room name */}
-          <div className="text-center font-semibold text-lg mb-2">
-            Room: <span className="text-blue-600">{room}</span>
-          </div>
-
-          {/* Messages area */}
-          <div className="flex-1 overflow-y-auto border p-2 mb-2 rounded bg-gray-50">
-            {messages.length === 0 ? (
-              <p className="text-center text-gray-400 mt-10">
-                No messages yet. Start chatting!
-              </p>
-            ) : (
-              messages.map((m, idx) => (
-                <ChatMessage
-                  key={idx}
-                  sender={m.sender}
-                  message={m.message}
-                  isOwnMessage={m.sender === userName}
-                />
-              ))
-            )}
-          </div>
-
-          {/* Chat input form */}
-          <ChatForm onSendMessage={handleSendMessage} />
-        </div>
+        <ChatWindow
+          currentRoom={currentRoom}
+          messages={messages}
+          localName={localName}
+          onLeave={handleLeaveRoom}
+          onSendMessage={handleSendMessage}
+        />
       )}
     </div>
   );
-};
-
-export default Page;
+}
