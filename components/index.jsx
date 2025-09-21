@@ -3,10 +3,12 @@ import Sidebar from "./Sidebar";
 import Navitem from "./NavItem";
 import Navlist from "./NavList";
 import AppShell from "./AppShell";
+import ChatForm from "./ChatForm";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
-import NotesTable from "./NotesTable";
 import FilesTable from "./FilesTable";
+import NotesTable from "./NotesTable";
+import ChatMessage from "./ChatMessage";
 import QuillEditor from "./QuillEditor";
 import NotesHeader from "./NotesHeader";
 import FroalaEditor from "./FroalaEdtior";
@@ -24,11 +26,13 @@ export {
   Sidebar,
   Navitem,
   Navlist,
+  ChatForm,
   AppShell,
   LoginForm,
   FilesTable,
   SignupForm,
   NotesTable,
+  ChatMessage,
   QuillEditor,
   NotesHeader,
   GeminiButton,

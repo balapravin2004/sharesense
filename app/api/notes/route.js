@@ -18,22 +18,44 @@ export async function POST(req) {
     const effectiveMode =
       !userId || rawMode === "general" ? "general" : rawMode;
 
-    // Prepare note data
-    let noteData = { content };
+    let note;
 
     if (effectiveMode === "general") {
-      noteData.isGlobal = false; // or true if you want it visible to all
+      note = await prisma.note.create({
+        data: { content, isGlobal: false, authorName: userName ?? null },
+      });
     } else if (effectiveMode === "user") {
-      noteData.isGlobal = false;
-      noteData.authorName = userName ?? null;
-      noteData.author = { connect: { id: userId } };
+      note = await prisma.note.create({
+        data: {
+          content,
+          isGlobal: false,
+          authorName: userName ?? null,
+          author: { connect: { id: userId } },
+        },
+      });
     } else if (effectiveMode === "both") {
-      noteData.isGlobal = true;
-      noteData.authorName = userName ?? null;
-      noteData.author = { connect: { id: userId } };
+      // Create one global (with author id) + one user-specific (without author id)
+      const [globalNote, userNote] = await Promise.all([
+        prisma.note.create({
+          data: {
+            content,
+            isGlobal: true,
+            authorName: userName ?? null,
+            author: { connect: { id: userId } }, // keep author id here
+          },
+        }),
+        prisma.note.create({
+          data: {
+            content,
+            isGlobal: false,
+            authorName: userName ?? null,
+            // ❌ no author relation (empty authorId)
+          },
+        }),
+      ]);
+      note = { globalNote, userNote };
     }
 
-    const note = await prisma.note.create({ data: noteData });
     return new Response(JSON.stringify(note), { status: 201 });
   } catch (error) {
     console.error("Error saving note:", error);
@@ -42,6 +64,7 @@ export async function POST(req) {
     });
   }
 }
+
 export async function GET() {
   try {
     const lastNote = await prisma.note.findFirst({
