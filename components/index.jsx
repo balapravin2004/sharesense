@@ -3,8 +3,9 @@ import Sidebar from "./Sidebar";
 import Navitem from "./NavItem";
 import Navlist from "./NavList";
 import AppShell from "./AppShell";
-import ChatForm from "./ChatForm";
+import ChatRoomForm from "./ChatRoomForm";
 import LoginForm from "./LoginForm";
+import ActiveRooms from "./ActiveRooms";
 import SignupForm from "./SignupForm";
 import FilesTable from "./FilesTable";
 import NotesTable from "./NotesTable";
@@ -20,6 +21,8 @@ import SidebarDesktop from "./SidebarDesktop";
 import NotesMobileList from "./NotesMobileList";
 import BottomNavMobile from "./BottomNavMobile";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import ChatWindow from "./ChatWindow";
+import ChatForm from "./ChatForm";
 
 export {
   Topbar,
@@ -27,6 +30,8 @@ export {
   Navitem,
   Navlist,
   ChatForm,
+  ChatRoomForm,
+  ChatWindow,
   AppShell,
   LoginForm,
   FilesTable,
@@ -34,6 +39,7 @@ export {
   NotesTable,
   ChatMessage,
   QuillEditor,
+  ActiveRooms,
   NotesHeader,
   GeminiButton,
   FroalaEditor,

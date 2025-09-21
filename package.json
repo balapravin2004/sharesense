@@ -5,9 +5,10 @@
     "dev": "next dev",
     "build": "next build && tsc server.mts --outDir dist",
     "start": "next start",
+    "dev:socket": "ts-node server.mts",
     "build:socket": "next build && tsc --project tsconfig.server.json",
     "start:socket": "NODE_ENV=production node dist/server.mjs",
-    "dev:socket": "ts-node server.mts"
+    "start:socket:local": "NODE_ENV=development node dist/server.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
