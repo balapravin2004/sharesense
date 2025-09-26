@@ -73,38 +73,18 @@ export default function EditorsSection() {
   };
 
   // Receive the latest note
+  // Receive the latest note
   const handleReceive = async () => {
     setIsReceiving(true);
     try {
-      const res = await axios.get("/api/allnotes");
+      const res = await axios.get("/api/receive");
 
       if (res.status !== 200) {
-        toast.error(res.data?.error || "Failed to fetch notes");
+        toast.error(res.data?.error || "Failed to fetch note");
         return;
       }
 
-      const data = res.data;
-      let note = null;
-
-      if (Array.isArray(data) && data.length) {
-        note = data.reduce((a, b) => {
-          const at = a?.timing ? new Date(a.timing).getTime() : 0;
-          const bt = b?.timing ? new Date(b.timing).getTime() : 0;
-          return bt > at ? b : a;
-        }, data[0]);
-      } else if (data?.content) {
-        note = data;
-      } else if (data?.notes?.length) {
-        note = data.notes.reduce((a, b) => {
-          const at = a?.timing ? new Date(a.timing).getTime() : 0;
-          const bt = b?.timing ? new Date(b.timing).getTime() : 0;
-          return bt > at ? b : a;
-        }, data.notes[0]);
-      } else {
-        toast.error("Unexpected response from server");
-        return;
-      }
-
+      const note = res.data;
       setContent(note.content ?? "");
       toast.success("Note received successfully!");
     } catch (error) {
