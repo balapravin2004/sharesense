@@ -15,7 +15,6 @@ export async function POST(req) {
 
     switch (mode) {
       case "general":
-        // Notes visible to everyone (guest)
         where = { isGlobal: false, authorId: null };
         break;
 
@@ -50,6 +49,7 @@ export async function POST(req) {
         break;
 
       default:
+        // Default to general notes
         where = { isGlobal: false, authorId: null };
     }
 

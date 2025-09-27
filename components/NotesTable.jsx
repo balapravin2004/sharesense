@@ -42,9 +42,9 @@ export default function NotesTable({
     if (selectedIds.length === 0) return;
     setBulkDeleting(true);
     try {
-      await axios.post("/api/deletenotes", { ids: selectedIds }); // ✅ delete
+      await axios.post("/api/deletenotes", { ids: selectedIds });
       setSelectedIds([]);
-      await fetchNotesFunction(); // ✅ refetch fresh notes
+      await fetchNotesFunction();
     } catch (error) {
       console.error(
         "Error bulk deleting notes:",
@@ -114,7 +114,6 @@ export default function NotesTable({
                 </td>
                 <td className="p-3 border align-top">{index + 1}</td>
 
-                {/* ✅ Clickable note preview */}
                 <td
                   className="p-3 border align-top max-w-lg cursor-pointer hover:underline"
                   onClick={() => router.push(`/notes/${note.id}`)}>

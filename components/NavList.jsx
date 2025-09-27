@@ -1,5 +1,7 @@
 import NavItem from "./NavItem";
 
+import LogoutButton from "./LogoutButton";
+
 const NavList = ({ items, pathname, collapsed }) => {
   return (
     <nav className="space-y-2 mt-[4rem]">
@@ -15,6 +17,7 @@ const NavList = ({ items, pathname, collapsed }) => {
           collapsed={collapsed}
         />
       ))}
+      <LogoutButton collapsed={collapsed} />
     </nav>
   );
 };

@@ -156,15 +156,13 @@ export default function NotesMobileList({
                   {shareNoteId === note.id && (
                     <div className="absolute bottom-12 left-1/2 -translate-x-1/2 p-2 bg-white border rounded shadow-lg flex gap-3">
                       <WhatsappShareButton
-                        url={`https://sharebhai.com/notes/${note.id}`}
-                        title={note.content}>
+                        url={`https://sharebhai.com/notes/${note.id}`}>
                         <FaWhatsapp className="text-green-600 w-6 h-6" />
                       </WhatsappShareButton>
 
                       <EmailShareButton
                         url={`https://sharebhai.com/notes/${note.id}`}
-                        subject="Check this note"
-                        body={note.content}>
+                        subject="Check this note">
                         <FaEnvelope className="text-blue-600 w-6 h-6" />
                       </EmailShareButton>
                     </div>
