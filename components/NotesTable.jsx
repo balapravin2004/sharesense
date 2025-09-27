@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import ShareModal from "./ShareModal";
 import axios from "axios";
 
+import { useSelector } from "react-redux";
+
 function timeAgo(timestamp) {
   if (!timestamp) return "—";
   const now = new Date();
@@ -31,7 +33,7 @@ export default function NotesTable({
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const router = useRouter();
-
+  const currentFilter = useSelector((state) => state.notes.filterMode);
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -136,7 +138,10 @@ export default function NotesTable({
                         await fetch("/api/uploadnotetoend", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ noteId: note.id }),
+                          body: JSON.stringify({
+                            noteId: note.id,
+                            filterMode: currentFilter,
+                          }),
                         });
                         fetchNotesFunction();
                       }}
