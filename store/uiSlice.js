@@ -29,6 +29,7 @@ const uiSlice = createSlice({
 });
 
 export const getNavItems = (state, dispatch) => {
+  console.log(useSelector(selectUser));
   return [
     {
       label: state.collapsed ? "Expand Sidebar" : "Collapse Sidebar",
