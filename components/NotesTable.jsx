@@ -7,6 +7,7 @@ import ShareModal from "./ShareModal";
 import axios from "axios";
 
 import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
 
 function timeAgo(timestamp) {
   if (!timestamp) return "—";
@@ -135,19 +136,29 @@ export default function NotesTable({
                   <div className="flex gap-2">
                     <button
                       onClick={async () => {
-                        await fetch("/api/uploadnotetoend", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
+                        try {
+                          const res = await axios.post("/api/uploadnotetoend", {
                             noteId: note.id,
                             filterMode: currentFilter,
-                          }),
-                        });
-                        fetchNotesFunction();
+                          });
+
+                          console.log("res");
+                          console.log(res.data);
+
+                          fetchNotesFunction();
+
+                          if (res.data.success) {
+                            toast.success("Uploaded to general section");
+                          }
+                        } catch (error) {
+                          console.error("Upload error:", error);
+                          toast.error("Failed to upload note");
+                        }
                       }}
                       className="px-3 py-2 rounded bg-indigo-500 text-white hover:bg-indigo-600 flex items-center gap-2">
                       <Upload className="w-4 h-4" />
                     </button>
+
                     <button
                       onClick={() => onDelete(note.id)}
                       className="px-3 py-2 rounded bg-red-500 text-white hover:bg-red-600 flex items-center justify-center gap-2">

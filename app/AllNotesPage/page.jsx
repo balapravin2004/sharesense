@@ -67,7 +67,7 @@ export default function AllNotesPage() {
   };
 
   return (
-    <div className="p-3 bg-gray-50 h-[95vh]">
+    <div className="p-3 bg-gray-50 h-[98vh]">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-4">
           <NotesHeader
