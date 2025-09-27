@@ -6,6 +6,8 @@ import { WhatsappShareButton, EmailShareButton } from "react-share";
 import { FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
+import { useSelector } from "react-redux";
+
 import axios from "axios";
 
 function timeAgo(timestamp) {
@@ -33,7 +35,7 @@ export default function NotesMobileList({
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const router = useRouter();
-
+  const currentFilter = useSelector((state) => state.notes.filterMode);
   // ✅ Toggle checkbox
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -123,10 +125,24 @@ export default function NotesMobileList({
                 {/* Upload */}
                 <button
                   onClick={async () => {
-                    await axios.post("/api/uploadnotetoend", {
-                      noteId: note.id,
-                    });
-                    fetchNotesFunction();
+                    try {
+                      const res = await axios.post("/api/uploadnotetoend", {
+                        noteId: note.id,
+                        filterMode: currentFilter,
+                      });
+
+                      console.log("res");
+                      console.log(res.data);
+
+                      fetchNotesFunction();
+
+                      if (res.data.success) {
+                        toast.success("Uploaded to general section");
+                      }
+                    } catch (error) {
+                      console.error("Upload error:", error);
+                      toast.error("Failed to upload note");
+                    }
                   }}
                   className="p-2 rounded bg-indigo-500 text-white flex items-center justify-center">
                   <Upload className="w-4 h-4" />
