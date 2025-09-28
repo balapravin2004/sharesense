@@ -139,7 +139,8 @@ export default function FilesTable() {
                   <div className="flex justify-end items-center gap-2">
                     <a
                       href={f.url}
-                      download
+                      target="_blank" // opens in a new tab
+                      rel="noopener noreferrer" // security best practice
                       className="p-2 border rounded hover:bg-gray-50">
                       <FiDownload />
                     </a>
