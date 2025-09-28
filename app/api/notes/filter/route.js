@@ -9,7 +9,6 @@ const prisma = new PrismaClient();
 export async function POST(req) {
   try {
     const { mode, userId } = await req.json();
-    console.log("Filter payload:", { mode, userId });
 
     let where = {};
 
