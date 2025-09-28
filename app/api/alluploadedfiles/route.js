@@ -1,15 +1,21 @@
-// pages/api/files.js
-import prisma from "../../../lib/prisma";
+// app/api/files/route.js
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
-export default async function handler(req, res) {
-  if (req.method !== "GET") return res.status(405).end();
+const prisma = new PrismaClient();
+
+export async function GET(req) {
   try {
     const files = await prisma.file.findMany({
       orderBy: { createdAt: "desc" },
     });
-    res.status(200).json({ files });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Failed to fetch files" });
+
+    return NextResponse.json({ files }, { status: 200 });
+  } catch (err) {
+    console.error("Fetch files error:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch files" },
+      { status: 500 }
+    );
   }
 }
