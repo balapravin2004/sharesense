@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import ShareModal from "./ShareModal";
 import axios from "axios";
 
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+
 function timeAgo(timestamp) {
   if (!timestamp) return "—";
   const now = new Date();
@@ -31,7 +34,7 @@ export default function NotesTable({
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const router = useRouter();
-
+  const currentFilter = useSelector((state) => state.notes.filterMode);
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -42,9 +45,9 @@ export default function NotesTable({
     if (selectedIds.length === 0) return;
     setBulkDeleting(true);
     try {
-      await axios.post("/api/deletenotes", { ids: selectedIds }); // ✅ delete
+      await axios.post("/api/deletenotes", { ids: selectedIds });
       setSelectedIds([]);
-      await fetchNotesFunction(); // ✅ refetch fresh notes
+      await fetchNotesFunction();
     } catch (error) {
       console.error(
         "Error bulk deleting notes:",
@@ -114,7 +117,6 @@ export default function NotesTable({
                 </td>
                 <td className="p-3 border align-top">{index + 1}</td>
 
-                {/* ✅ Clickable note preview */}
                 <td
                   className="p-3 border align-top max-w-lg cursor-pointer hover:underline"
                   onClick={() => router.push(`/notes/${note.id}`)}>
@@ -134,16 +136,28 @@ export default function NotesTable({
                   <div className="flex gap-2">
                     <button
                       onClick={async () => {
-                        await fetch("/api/uploadnotetoend", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ noteId: note.id }),
-                        });
-                        fetchNotesFunction();
+                        try {
+                          const res = await axios.post("/api/uploadnotetoend", {
+                            noteId: note.id,
+                            filterMode: currentFilter,
+                          });
+
+           
+
+                          fetchNotesFunction();
+
+                          if (res.data.success) {
+                            toast.success("Uploaded to general section");
+                          }
+                        } catch (error) {
+                          console.error("Upload error:", error);
+                          toast.error("Failed to upload note");
+                        }
                       }}
                       className="px-3 py-2 rounded bg-indigo-500 text-white hover:bg-indigo-600 flex items-center gap-2">
                       <Upload className="w-4 h-4" />
                     </button>
+
                     <button
                       onClick={() => onDelete(note.id)}
                       className="px-3 py-2 rounded bg-red-500 text-white hover:bg-red-600 flex items-center justify-center gap-2">

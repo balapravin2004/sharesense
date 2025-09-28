@@ -6,6 +6,8 @@ import { WhatsappShareButton, EmailShareButton } from "react-share";
 import { FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
+import { useSelector } from "react-redux";
+
 import axios from "axios";
 
 function timeAgo(timestamp) {
@@ -33,7 +35,7 @@ export default function NotesMobileList({
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const router = useRouter();
-
+  const currentFilter = useSelector((state) => state.notes.filterMode);
   // ✅ Toggle checkbox
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -123,10 +125,21 @@ export default function NotesMobileList({
                 {/* Upload */}
                 <button
                   onClick={async () => {
-                    await axios.post("/api/uploadnotetoend", {
-                      noteId: note.id,
-                    });
-                    fetchNotesFunction();
+                    try {
+                      const res = await axios.post("/api/uploadnotetoend", {
+                        noteId: note.id,
+                        filterMode: currentFilter,
+                      });
+
+                      fetchNotesFunction();
+
+                      if (res.data.success) {
+                        toast.success("Uploaded to general section");
+                      }
+                    } catch (error) {
+                      console.error("Upload error:", error);
+                      toast.error("Failed to upload note");
+                    }
                   }}
                   className="p-2 rounded bg-indigo-500 text-white flex items-center justify-center">
                   <Upload className="w-4 h-4" />
@@ -156,15 +169,13 @@ export default function NotesMobileList({
                   {shareNoteId === note.id && (
                     <div className="absolute bottom-12 left-1/2 -translate-x-1/2 p-2 bg-white border rounded shadow-lg flex gap-3">
                       <WhatsappShareButton
-                        url={`https://sharebhai.com/notes/${note.id}`}
-                        title={note.content}>
+                        url={`https://sharebhai.com/notes/${note.id}`}>
                         <FaWhatsapp className="text-green-600 w-6 h-6" />
                       </WhatsappShareButton>
 
                       <EmailShareButton
                         url={`https://sharebhai.com/notes/${note.id}`}
-                        subject="Check this note"
-                        body={note.content}>
+                        subject="Check this note">
                         <FaEnvelope className="text-blue-600 w-6 h-6" />
                       </EmailShareButton>
                     </div>

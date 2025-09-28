@@ -6,9 +6,12 @@ import {
   setQuery,
   deleteNote,
   setDeletingId,
+  setFilterMode,
   setFilteredNotes,
   toggleShowImages,
 } from "../../store/notesSlice";
+
+import axios from "axios";
 
 import NotesHeader from "../../components/NotesHeader";
 import NotesTable from "../../components/NotesTable";
@@ -23,36 +26,36 @@ export default function AllNotesPage() {
   );
   const user = useSelector((state) => state.auth.user);
 
-  // Guests see general by default, logged-in sees both
-  const [filterMode, setFilterMode] = useState(user ? "both" : "general");
+  // const [filterMode, setFilterMode] = useState(user ? "both" : "general");
+  const filterMode = useSelector((state) => state.notes.filterMode);
   const [fetching, setFetching] = useState(false);
 
-  // Fetch notes from API according to filterMode
   const fetchFilteredNotes = async (mode) => {
     try {
       setFetching(true);
-      const payload = { mode, userId: user?.id || null, query }; // include query
 
-      const res = await fetch("/api/notes/filter", {
-        method: "POST",
+      const payload = {
+        mode: mode.toLowerCase(),
+        userId: user?.id || null,
+        query,
+      };
+
+      const res = await axios.post("/api/notes/filter", payload, {
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        dispatch(setFilteredNotes(data));
-      } else {
-        console.error(data.error || "Failed to fetch notes");
-      }
+      // Axios automatically parses JSON
+      dispatch(setFilteredNotes(res.data));
     } catch (error) {
-      console.error("Error fetching notes:", error);
+      console.error(
+        error.response?.data?.error || "Error fetching notes",
+        error
+      );
     } finally {
       setFetching(false);
     }
   };
 
-  // Initial fetch + re-fetch when filterMode or user changes
   useEffect(() => {
     fetchFilteredNotes(filterMode);
   }, [filterMode, user?.id]);
@@ -64,9 +67,8 @@ export default function AllNotesPage() {
   };
 
   return (
-    <div className="p-3 bg-gray-50 h-[95vh]">
+    <div className="p-3 bg-gray-50 h-[98vh]">
       <div className="max-w-6xl mx-auto">
-        {/* Header + Image toggle */}
         <div className="flex items-center justify-between mb-4">
           <NotesHeader
             query={query}
@@ -94,12 +96,14 @@ export default function AllNotesPage() {
                     ? "bg-blue-600 text-white border-blue-800"
                     : "bg-gray-200 text-gray-800 border-gray-300"
                 }`}
-                onClick={() => setFilterMode(type)}>
+                onClick={() => {
+                  dispatch(setFilterMode(type));
+                }}>
                 {type === "general"
                   ? "General"
                   : type === "both"
                   ? "Both"
-                  : "Your data"}
+                  : "Personal"}
               </button>
             ))}
           </div>
