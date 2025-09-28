@@ -5,7 +5,7 @@ import { cancelUpload, uploadFileDirect } from "../store/uploadSlice";
 import { v4 as uuidv4 } from "uuid";
 
 const humanFileSize = (size) => {
-  if (size === 0) return "0 B";
+  if (!size) return "0 B";
   const i = Math.floor(Math.log(size) / Math.log(1024));
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   return (size / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
@@ -15,7 +15,7 @@ export default function UploadModal({ open, onClose }) {
   const dispatch = useDispatch();
   const token =
     typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
-  const { uploading } = useSelector((s) => s.uploads);
+  const uploading = useSelector((s) => s.uploads.uploading || {});
 
   const fileInputRef = useRef(null);
   const overlayRef = useRef();
@@ -51,7 +51,7 @@ export default function UploadModal({ open, onClose }) {
       className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-2 sm:p-4">
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col max-h-[80vh] overflow-hidden border border-black">
+        className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-4 sm:p-6 flex flex-col max-h-[80vh] overflow-hidden border">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Upload files</h3>
@@ -61,7 +61,8 @@ export default function UploadModal({ open, onClose }) {
             Close
           </button>
         </div>
-        {/* Drag & Drop area */}
+
+        {/* Drag & Drop */}
         <div
           onDrop={onDrop}
           onDragOver={(e) => e.preventDefault()}
@@ -91,11 +92,12 @@ export default function UploadModal({ open, onClose }) {
             You can upload multiple files — images, docs, audio, video, etc.
           </p>
         </div>
-        {/* Uploading list with vertical scroll */}
+
+        {/* Uploading list */}
         <div className="mt-6 flex-1 flex flex-col overflow-hidden">
           <h4 className="text-sm font-medium mb-2">Uploading</h4>
           <div className="space-y-3 flex-1 overflow-y-auto pr-2">
-            {Object.entries(uploading).length === 0 && (
+            {Object.keys(uploading).length === 0 && (
               <div className="text-sm text-gray-500">No active uploads</div>
             )}
 
@@ -114,6 +116,8 @@ export default function UploadModal({ open, onClose }) {
                     <div className="text-xs text-gray-500 truncate">
                       {entry.type || "—"} • {humanFileSize(entry.size)}
                     </div>
+
+                    {/* Progress Bar */}
                     <div className="mt-2 w-full bg-gray-200 h-2 rounded overflow-hidden">
                       <div
                         style={{ width: `${entry.progress}%` }}

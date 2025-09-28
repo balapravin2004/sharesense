@@ -6,7 +6,7 @@ import FilesTable from "./FilesTable";
 export default function UploadButtonAndModalWrapper() {
   const [open, setOpen] = useState(false);
   return (
-    <div className="p-4 border border-black">
+    <div className="p-4 border border-none">
       <div className="flex items-center justify-between mb-6">
         <div className="text-xl font-semibold">Files</div>
         <button

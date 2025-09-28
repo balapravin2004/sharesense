@@ -13,10 +13,10 @@ cloudinary.v2.config({
 // POST handler
 export async function POST(req) {
   try {
-    // extract user (may be null if not authenticated)
+    // Extract user (may be null if not authenticated)
     const userPayload = getUserFromAuthHeader(req);
 
-    // parse form data
+    // Parse form data
     const formData = await req.formData();
     const files = formData.getAll("files"); // "files" must match frontend .append("files", file)
 
@@ -33,7 +33,7 @@ export async function POST(req) {
       const uploadResult = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.v2.uploader.upload_stream(
           {
-            resource_type: "auto",
+            resource_type: "raw", // <-- change from "auto" to "raw"
             public_id: `uploads/${Date.now()}_${file.name}`,
           },
           (error, result) => {
@@ -44,13 +44,14 @@ export async function POST(req) {
         uploadStream.end(buffer);
       });
 
-      // Save in DB (Prisma)
+      // Save in DB (Prisma) and store public_id
       const created = await prisma.file.create({
         data: {
           filename: file.name,
           mimeType: file.type || "application/octet-stream",
           size: buffer.length,
           url: uploadResult.secure_url,
+          publicId: uploadResult.public_id, // <-- store public_id
           uploadedById: userPayload?.id || null,
         },
       });
@@ -61,6 +62,7 @@ export async function POST(req) {
         mimeType: created.mimeType,
         size: created.size,
         url: created.url,
+        publicId: created.publicId,
         createdAt: created.createdAt,
       });
     }
