@@ -142,8 +142,7 @@ export default function NotesTable({
                             filterMode: currentFilter,
                           });
 
-                          console.log("res");
-                          console.log(res.data);
+           
 
                           fetchNotesFunction();
 

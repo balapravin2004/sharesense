@@ -1,331 +1,258 @@
-"use client";
-import React, { useState, useRef, useEffect } from "react";
+// === File: components/FilesTable.jsx ===
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { setFiles, deleteFile as deleteFileAction } from "../store/uploadSlice";
+import {
+  FiSearch,
+  FiRefreshCcw,
+  FiDownload,
+  FiTrash2,
+  FiShare2,
+} from "react-icons/fi";
+import { AiOutlineFile } from "react-icons/ai";
+import FullscreenFilesModal from "./FullscreenFilesModal";
 
-/**
- * FilesTable (enhanced)
- * - shows files (prop: files)
- * - Upload button opens modal
- * - Simulated upload with progress bar & status
- * - Very responsive (table scrolls on small screens)
- *
- * Optional prop:
- * - onUpload(fileMeta) => called when upload completes (so parent can add file)
- */
+export default function FilesTable() {
+  const dispatch = useDispatch();
+  const files = useSelector((s) => s.uploads.files || []);
 
-function formatBytes(bytes) {
-  if (!bytes) return "0 B";
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
-}
+  const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [openFull, setOpenFull] = useState(false);
+  const [selected, setSelected] = useState(new Set());
+  const [working, setWorking] = useState(false);
 
-export default function FilesTable({ files = [], onUpload }) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [progress, setProgress] = useState(0);
-  const [uploading, setUploading] = useState(false);
-  const [statusText, setStatusText] = useState("Ready");
-  const uploadIntervalRef = useRef(null);
-  const fileInputRef = useRef(null);
+  useEffect(() => load(), []);
 
-  useEffect(() => {
-    return () => {
-      if (uploadIntervalRef.current) clearInterval(uploadIntervalRef.current);
-    };
-  }, []);
-
-  const openModal = () => {
-    setSelectedFile(null);
-    setProgress(0);
-    setStatusText("Ready");
-    setModalOpen(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const closeModal = () => {
-    // stop any running simulated upload
-    if (uploadIntervalRef.current) {
-      clearInterval(uploadIntervalRef.current);
-      uploadIntervalRef.current = null;
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get("/api/alluploadedfiles");
+      dispatch(setFiles(res.data.files || []));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
-    setUploading(false);
-    setProgress(0);
-    setStatusText("Ready");
-    setModalOpen(false);
   };
 
-  const handleFilePick = (e) => {
-    const f = e.target.files?.[0] ?? null;
-    setSelectedFile(f);
-    setStatusText(f ? `Selected: ${f.name}` : "Ready");
+  const filtered = useMemo(() => {
+    if (!q) return files;
+    const lower = q.toLowerCase();
+    return files.filter((f) =>
+      (f.filename || "").toLowerCase().includes(lower)
+    );
+  }, [files, q]);
+
+  const toggle = (id) => {
+    const s = new Set(selected);
+    if (s.has(id)) s.delete(id);
+    else s.add(id);
+    setSelected(s);
   };
 
-  const simulateUpload = (file) => {
-    setUploading(true);
-    setStatusText("Uploading...");
-    setProgress(0);
+  const toggleAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set());
+    else setSelected(new Set(filtered.map((f) => f.id)));
+  };
 
-    // Simulate upload speed proportional to file size (but capped)
-    const sizeKB = Math.max(1, Math.round((file.size || 0) / 1024));
-    // duration between 1.5s and 8s depending on size
-    const targetDuration = Math.min(8000, Math.max(1500, sizeKB * 10));
-    const stepMs = 200;
-    const steps = Math.ceil(targetDuration / stepMs);
-    let step = 0;
+  const deleteSelected = async () => {
+    if (selected.size === 0) return;
+    if (!confirm(`Delete ${selected.size} file(s)?`)) return;
+    setWorking(true);
+    try {
+      const ids = Array.from(selected);
+      await Promise.all(ids.map((id) => axios.delete(`/api/deletefile/${id}`)));
+      ids.forEach((id) => dispatch(deleteFileAction(id)));
+      setSelected(new Set());
+      load();
+    } catch (e) {
+      console.error(e);
+      alert("Delete failed");
+    } finally {
+      setWorking(false);
+    }
+  };
 
-    uploadIntervalRef.current = setInterval(() => {
-      step++;
-      const pct = Math.min(100, Math.round((step / steps) * 100));
-      setProgress(pct);
-      setStatusText(`Uploading... ${pct}%`);
+  const humanFileSize = (size) => {
+    if (!size) return "0 B";
+    const i = Math.floor(Math.log(size) / Math.log(1024));
+    const sizes = ["B", "KB", "MB", "GB"];
+    return (size / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
+  };
 
-      // occasional small jitter
-      if (pct >= 100) {
-        clearInterval(uploadIntervalRef.current);
-        uploadIntervalRef.current = null;
-        setUploading(false);
-        setStatusText("Processing...");
-
-        // small delay to simulate server processing
-        setTimeout(() => {
-          setStatusText("Completed");
-          setProgress(100);
-
-          // build file meta and notify parent
-          const fileMeta = {
-            id: `file-${Date.now()}`,
-            name: file.name,
-            size: formatBytes(file.size),
-            time: new Date().toISOString(),
-            url: URL.createObjectURL(file), // client-only demo
-          };
-
-          if (typeof onUpload === "function") {
-            onUpload(fileMeta);
-          }
-
-          // close modal after a short moment
-          setTimeout(() => {
-            closeModal();
-          }, 700);
-        }, 700);
+  const shareFile = async (file) => {
+    const shareUrl = file.url;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: file.filename, url: shareUrl });
+      } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Link copied");
+      } catch {
+        alert("Copy failed");
       }
-    }, stepMs);
-  };
-
-  const handleStartUpload = (e) => {
-    e.preventDefault();
-    if (!selectedFile) {
-      setStatusText("Please select a file first");
-      return;
     }
-    // start simulated upload
-    simulateUpload(selectedFile);
-  };
-
-  const handleCancelUpload = () => {
-    if (uploadIntervalRef.current) {
-      clearInterval(uploadIntervalRef.current);
-      uploadIntervalRef.current = null;
-    }
-    setUploading(false);
-    setProgress(0);
-    setStatusText("Cancelled");
   };
 
   return (
-    <div className="overflow-x-auto bg-gray-50 rounded-xl shadow p-4">
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Uploaded Files
-          </h2>
-          <p className="text-sm text-gray-500">
-            Files uploaded to the secure area
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+    <div className="w-full">
+      {/* Sticky top controls */}
+      <div className="sticky top-0 bg-white z-20 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search files..."
+              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
           <button
-            onClick={openModal}
-            className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-95 text-sm">
-            Upload File
+            onClick={load}
+            title="Refresh"
+            className="px-3 py-2 rounded-lg bg-white border shadow-sm hover:bg-gray-50 flex items-center gap-2">
+            <FiRefreshCcw />
           </button>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="w-full">
-        <table className="min-w-full text-sm text-left text-gray-700">
-          <thead className="bg-gray-200 text-gray-900">
-            <tr>
-              <th className="py-2 px-3">ID</th>
-              <th className="py-2 px-3">Name</th>
-              <th className="py-2 px-3">Size</th>
-              <th className="py-2 px-3">Uploaded</th>
-              <th className="py-2 px-3 text-right">Actions</th>
+      {/* Desktop Table */}
+      <div className="bg-white rounded-xl shadow p-4 border border-gray-200 hidden md:block max-h-[30rem] overflow-y-auto">
+        <table className="w-full table-auto border-collapse text-sm">
+          <thead className="sticky top-[-5px] bg-white z-10">
+            <tr className="text-left text-gray-600">
+              {/* <th className="px-3 py-3 w-12">
+                <input
+                  type="checkbox"
+                  checked={
+                    selected.size === filtered.length && filtered.length > 0
+                  }
+                  onChange={toggleAll}
+                />
+              </th> */}
+              <th className="px-3 py-3 font-medium">Filename</th>
+              <th className="px-3 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {files.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="py-8 text-center text-gray-400">
-                  No files yet — upload one to get started
+            {filtered.map((f) => (
+              <tr key={f.id} className="border-b hover:bg-gray-50">
+                {/* <td className="px-3 py-4">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(f.id)}
+                    onChange={() => toggle(f.id)}
+                  />
+                </td> */}
+                <td className="px-3 py-4 flex items-center gap-3 break-all">
+                  <AiOutlineFile className="text-xl text-gray-600" />
+                  <div>
+                    <div className="font-medium">
+                      {f.filename} ({humanFileSize(f.size)})
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {f.description || "—"}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-3 py-4 flex items-center gap-2">
+                  <a
+                    href={f.url}
+                    download
+                    className="p-2 border rounded hover:bg-gray-50">
+                    <FiDownload />
+                  </a>
+                  <button
+                    onClick={() => shareFile(f)}
+                    className="p-2 border rounded hover:bg-gray-50">
+                    <FiShare2 />
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!confirm("Delete this file?")) return;
+                      try {
+                        await axios.delete(`/api/deletefile/${f.id}`);
+                        dispatch(deleteFileAction(f.id));
+                      } catch {
+                        alert("Delete failed");
+                      }
+                    }}
+                    className="p-2 border rounded hover:bg-red-50 text-red-600">
+                    <FiTrash2 />
+                  </button>
                 </td>
               </tr>
-            ) : (
-              files.map((file) => (
-                <tr
-                  key={file.id}
-                  className="border-b last:border-none hover:bg-gray-50">
-                  <td className="py-2 px-3 align-top">{file.id}</td>
-                  <td className="py-2 px-3 align-top max-w-xs truncate">
-                    {file.name}
-                  </td>
-                  <td className="py-2 px-3 align-top">{file.size}</td>
-                  <td className="py-2 px-3 align-top">{file.time}</td>
-                  <td className="py-2 px-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => {
-                          // client side download demo — only works for URL created in client
-                          if (file.url) {
-                            const a = document.createElement("a");
-                            a.href = file.url;
-                            a.download = file.name;
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                          } else {
-                            alert("Download not available in demo");
-                          }
-                        }}
-                        className="px-3 py-1 rounded-md bg-blue-600 text-white text-sm">
-                        Download
-                      </button>
-                      <button
-                        onClick={() => {
-                          // remove file (demo)
-                          if (typeof onUpload === "function") {
-                            // parent should handle removal; but we can't mutate parent files here without a callback
-                            // so we just alert if no callback provided
-                            const ok = confirm("Remove this file?");
-                            if (ok) {
-                              // if parent provided onUpload, they probably provided a remove handler; not in this signature
-                              alert(
-                                "Please implement removal in parent (onUpload callback or dedicated handler)"
-                              );
-                            }
-                          } else {
-                            alert(
-                              "Removal requires parent handler in this demo"
-                            );
-                          }
-                        }}
-                        className="px-2 py-1 rounded-md bg-red-50 text-red-600 text-sm">
-                        Remove
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+            ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-3 py-6 text-center text-gray-400">
+                  {loading ? "Loading..." : "No files found"}
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
-
-          <div className="relative max-w-xl w-full bg-white rounded-xl shadow-lg p-5 z-10">
-            <h3 className="text-lg font-semibold mb-3">Upload file</h3>
-
-            <form onSubmit={handleStartUpload} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="text-sm font-medium text-gray-700">
-                    Choose file
-                  </span>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    onChange={handleFilePick}
-                    className="mt-2 block w-full"
-                    aria-label="File input"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="text-sm font-medium text-gray-700">
-                    Expiration (minutes)
-                  </span>
-                  <input
-                    type="number"
-                    min="1"
-                    defaultValue={60}
-                    onChange={(e) => {
-                      const m = Number(e.target.value) || 1;
-                      // store as dataset on selectedFile if available; simpler to use closure when starting upload
-                      // We'll store expirationMinutes in a ref on selectedFile for demo:
-                      if (selectedFile) selectedFile.expirationMinutes = m;
-                      // also update status
-                      setStatusText(`Expires in ${m} minute(s)`);
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-3 overflow-auto max-h-[30rem] mb-[3rem]">
+        {filtered.map((f) => (
+          <div key={f.id} className="border rounded-lg p-3 bg-white shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-xl text-gray-600">
+                <AiOutlineFile />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium break-all">
+                  {f.filename} ({humanFileSize(f.size)})
+                </div>
+                <div className="text-xs text-gray-400">
+                  {f.description || "—"}
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <a
+                    href={f.url}
+                    download
+                    className="p-2 border rounded hover:bg-gray-50">
+                    <FiDownload />
+                  </a>
+                  <button
+                    onClick={() => shareFile(f)}
+                    className="p-2 border rounded hover:bg-gray-50">
+                    <FiShare2 />
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (!confirm("Delete this file?")) return;
+                      try {
+                        await axios.delete(`/api/deletefile/${f.id}`);
+                        dispatch(deleteFileAction(f.id));
+                      } catch {
+                        alert("Delete failed");
+                      }
                     }}
-                    className="mt-2 block w-full border border-gray-200 rounded px-3 py-2"
-                  />
-                </label>
-              </div>
-
-              {/* Status + progress */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm text-gray-600">{statusText}</div>
-                  <div className="text-xs text-gray-400">
-                    {uploading ? `${progress}%` : ""}
-                  </div>
-                </div>
-
-                <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
-                  <div
-                    className="h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all"
-                    style={{ width: `${progress}%` }}
-                  />
+                    className="p-2 border rounded hover:bg-red-50 text-red-600">
+                    <FiTrash2 />
+                  </button>
                 </div>
               </div>
-
-              {/* Action buttons */}
-              <div className="flex items-center justify-end gap-2">
-                {!uploading ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={closeModal}
-                      className="px-4 py-2 rounded-md border">
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 rounded-md text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-                      Start Upload
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleCancelUpload}
-                      className="px-4 py-2 rounded-md border">
-                      Cancel Upload
-                    </button>
-                  </>
-                )}
-              </div>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
+
+      {/* Fullscreen Modal */}
+      <FullscreenFilesModal
+        open={openFull}
+        onClose={() => setOpenFull(false)}
+        files={filtered}
+        reload={load}
+      />
     </div>
   );
 }

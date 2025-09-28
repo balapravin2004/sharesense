@@ -79,7 +79,6 @@ const notesSlice = createSlice({
       }
 
       state.filteredNotes = temp;
-      console.log("filteredNotes", state.filteredNotes);
     },
 
     toggleShowImages: (state) => {
@@ -161,8 +160,7 @@ const notesSlice = createSlice({
 
         // Initialize baseFilteredNotes based on filterMode
         state.baseFilteredNotes = state.notes.filter((note) => {
-          console.log("note");
-          console.log(note);
+
           if (state.filterMode === "general") return note;
           if (state.filterMode === "user") return !note.isGlobal;
           return true;

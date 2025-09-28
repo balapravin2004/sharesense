@@ -131,9 +131,6 @@ export default function NotesMobileList({
                         filterMode: currentFilter,
                       });
 
-                      console.log("res");
-                      console.log(res.data);
-
                       fetchNotesFunction();
 
                       if (res.data.success) {
