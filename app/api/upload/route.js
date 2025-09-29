@@ -1,70 +1,69 @@
-// app/api/upload/route.js
 import { NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
-import { PrismaClient } from "@prisma/client";
-
-export const runtime = "nodejs"; // ensure Node runtime for Buffer/streams
-
-// ----- Cloudinary config (from environment) -----
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-// Reuse Prisma client
-const prisma = new PrismaClient();
-
-// Helper: upload a Buffer to Cloudinary
-function uploadBufferToCloudinary(buffer, folder = "sharesense/uploads") {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "image" },
-      (err, result) => (err ? reject(err) : resolve(result))
-    );
-    stream.end(buffer);
-  });
-}
+import prisma from "../../../lib/prisma";
+import { getUserFromAuthHeader } from "../../../lib/auth";
+import { supabase } from "../../../lib/supabase";
 
 export async function POST(req) {
   try {
-    // 1) Read the multipart form-data from Froala
+    const userPayload = getUserFromAuthHeader(req);
+
     const formData = await req.formData();
-    const file = formData.get("file");
-    if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    const files = formData.getAll("files");
+
+    if (!files || files.length === 0) {
+      return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
     }
 
-    // 2) Convert to Buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const saved = [];
 
-    // 3) Upload to Cloudinary
-    const upload = await uploadBufferToCloudinary(buffer);
-    const secureUrl = upload.secure_url; // CDN URL
-    const bytes = upload.bytes ?? buffer.length;
-    const format = upload.format
-      ? `image/${upload.format}`
-      : file.type || "image";
-    const originalName = file.name || upload.original_filename || "image";
+    for (const file of files) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const uniqueName = `${Date.now()}_${file.name}`;
 
-    // 4) Save record to DB (File model)
-    // If you have auth, set uploadedById and isAnonymous=false accordingly.
-    await prisma.file.create({
-      data: {
-        filename: originalName,
-        mimeType: format,
-        size: bytes,
-        url: secureUrl, // <-- Cloudinary CDN URL saved here
-        uploadedById: null, // set user id if available
-        isAnonymous: true, // flip if you attach a user
-      },
-    });
+      // Upload to Supabase Storage bucket "uploads"
+      const { data, error } = await supabase.storage
+        .from("uploads")
+        .upload(uniqueName, buffer, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
 
-    // 5) Return Froala-compatible response
-    return NextResponse.json({ link: secureUrl });
-  } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+      if (error) throw error;
+        // adding more code
+      // Get public URL
+      const { data: publicUrl } = supabase.storage
+        .from("uploads")
+        .getPublicUrl(uniqueName);
+
+      // Save file metadata in DB
+      const created = await prisma.file.create({
+        data: {
+          filename: file.name,
+          mimeType: file.type || "application/octet-stream",
+          size: buffer.length,
+          url: publicUrl.publicUrl,
+          publicId: uniqueName,
+          uploadedById: userPayload?.id || null,
+        },
+      });
+
+      saved.push({
+        id: created.id,
+        filename: created.filename,
+        mimeType: created.mimeType,
+        size: created.size,
+        url: created.url,
+        publicId: created.publicId,
+        createdAt: created.createdAt,
+      });
+    }
+
+    return NextResponse.json({ files: saved });
+  } catch (err) {
+    console.error("Upload error:", err);
+    return NextResponse.json(
+      { error: err.message || "Upload failed" },
+      { status: 500 }
+    );
   }
 }
