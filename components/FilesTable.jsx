@@ -141,9 +141,8 @@ export default function FilesTable() {
                   <div className="flex justify-end items-center gap-2">
                     <a
                       href={f.url}
-                      target="_blank" // opens in a new tab
-                      rel="noopener noreferrer" // security best practice
-                      className="p-2 border rounded hover:bg-gray-50">
+                      download={f.filename} // ensures download
+                      className="p-2 border rounded hover:bg-gray-50 flex items-center justify-center">
                       <FiDownload />
                     </a>
                     <button
@@ -194,8 +193,8 @@ export default function FilesTable() {
                 <div className="mt-2 flex items-center gap-2">
                   <a
                     href={f.url}
-                    download
-                    className="p-2 border rounded hover:bg-gray-50">
+                    download={f.filename} // ensures download
+                    className="p-2 border rounded hover:bg-gray-50 flex items-center justify-center">
                     <FiDownload />
                   </a>
                   <button
