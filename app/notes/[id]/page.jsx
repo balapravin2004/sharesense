@@ -46,7 +46,6 @@ export default function NotePage() {
       try {
         setIsSaving(true);
         await axios.put(`/api/notes/${params.id}`, { content });
-        console.log("Auto-saved ✅");
       } catch (error) {
         toast.error("Failed to auto-save");
         console.error("Auto-save error:", error);

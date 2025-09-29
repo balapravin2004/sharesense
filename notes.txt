@@ -1,1 +1,6 @@
-6. file sharing feature with file upload progress with drag and drop feature 
+i made FE and BE in next js 
+using cloudinary i made backend api to uplod files on cloudinary 
+but this supports some docs 
+exe are not allowed 
+
+tel me some other alternatives 

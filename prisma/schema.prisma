@@ -25,6 +25,7 @@ model File {
   mimeType       String
   size           Int
   url            String
+  publicId       String         // <-- store Cloudinary public_id here
   uploadedBy     User?          @relation(fields: [uploadedById], references: [id])
   uploadedById   String?
   isAnonymous    Boolean        @default(false)
@@ -59,6 +60,6 @@ model Note {
   timing     DateTime @default(now())
   author     User?    @relation(fields: [authorId], references: [id])
   authorId   String?
-  authorName String?  // <-- store author's name
-  isGlobal   Boolean  @default(false) // <-- store general/both flag
+  authorName String?  // store author's name
+  isGlobal   Boolean  @default(false) // store general/both flag
 }
