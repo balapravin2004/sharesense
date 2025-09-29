@@ -21,8 +21,6 @@ export default function FilesTable() {
   const [openFull, setOpenFull] = useState(false);
   const [selected, setSelected] = useState(new Set());
 
-  useEffect(() => load(), []);
-
   const load = async () => {
     setLoading(true);
     try {
@@ -34,6 +32,10 @@ export default function FilesTable() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    load();
+  }, []);
 
   const filtered = useMemo(() => {
     if (!q) return files;
