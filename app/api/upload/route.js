@@ -1,57 +1,48 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../lib/prisma";
 import { getUserFromAuthHeader } from "../../../lib/auth";
-import { promises as fs } from "fs";
-import path from "path";
+import { supabase } from "../../../lib/supabase";
 
-// Upload folder inside project root
-const uploadDir = path.join(process.cwd(), "public/uploads");
-
-// Ensure uploads folder exists
-async function ensureUploadDir() {
-  try {
-    await fs.access(uploadDir);
-  } catch {
-    await fs.mkdir(uploadDir, { recursive: true });
-  }
-}
-
-// POST handler
 export async function POST(req) {
   try {
-    // Get authenticated user (if any)
     const userPayload = getUserFromAuthHeader(req);
 
-    // Parse form data
     const formData = await req.formData();
-    const files = formData.getAll("files"); // match frontend .append("files", file)
+    const files = formData.getAll("files");
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
     }
 
-    await ensureUploadDir();
-
     const saved = [];
+
     for (const file of files) {
-      // Convert to buffer
       const buffer = Buffer.from(await file.arrayBuffer());
-
-      // Unique filename to avoid collisions
       const uniqueName = `${Date.now()}_${file.name}`;
-      const filePath = path.join(uploadDir, uniqueName);
 
-      // Save file locally
-      await fs.writeFile(filePath, buffer);
+      // Upload to Supabase Storage bucket "uploads"
+      const { data, error } = await supabase.storage
+        .from("uploads")
+        .upload(uniqueName, buffer, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
 
-      // Save file info in DB
+      if (error) throw error;
+
+      // Get public URL
+      const { data: publicUrl } = supabase.storage
+        .from("uploads")
+        .getPublicUrl(uniqueName);
+
+      // Save file metadata in DB
       const created = await prisma.file.create({
         data: {
           filename: file.name,
           mimeType: file.type || "application/octet-stream",
           size: buffer.length,
-          url: `/uploads/${uniqueName}`, // relative URL for frontend
-          publicId: uniqueName, // can use as unique identifier
+          url: publicUrl.publicUrl,
+          publicId: uniqueName,
           uploadedById: userPayload?.id || null,
         },
       });
