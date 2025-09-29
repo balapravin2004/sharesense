@@ -115,12 +115,6 @@ export default function FilesTable() {
       {/* Desktop Table */}
       <div className="bg-white rounded-xl shadow p-4 border border-gray-200 hidden md:block max-h-[30rem] overflow-y-auto">
         <table className="w-full table-auto text-sm border-collapse">
-          <thead className="sticky top-0 bg-white z-10">
-            <tr className="text-left text-gray-600">
-              <th className="px-3 py-3 font-medium">Filename</th>
-              <th className="px-3 py-3 font-medium text-right">Actions</th>
-            </tr>
-          </thead>
           <tbody>
             {filtered.map((f) => (
               <tr
