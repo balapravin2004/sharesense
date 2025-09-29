@@ -1,57 +1,57 @@
 import { NextResponse } from "next/server";
-import cloudinary from "cloudinary";
 import prisma from "../../../lib/prisma";
 import { getUserFromAuthHeader } from "../../../lib/auth";
+import { promises as fs } from "fs";
+import path from "path";
 
-// Configure Cloudinary
-cloudinary.v2.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Upload folder inside project root
+const uploadDir = path.join(process.cwd(), "public/uploads");
+
+// Ensure uploads folder exists
+async function ensureUploadDir() {
+  try {
+    await fs.access(uploadDir);
+  } catch {
+    await fs.mkdir(uploadDir, { recursive: true });
+  }
+}
 
 // POST handler
 export async function POST(req) {
   try {
-    // Extract user (may be null if not authenticated)
+    // Get authenticated user (if any)
     const userPayload = getUserFromAuthHeader(req);
 
     // Parse form data
     const formData = await req.formData();
-    const files = formData.getAll("files"); // "files" must match frontend .append("files", file)
+    const files = formData.getAll("files"); // match frontend .append("files", file)
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
     }
+
+    await ensureUploadDir();
 
     const saved = [];
     for (const file of files) {
       // Convert to buffer
       const buffer = Buffer.from(await file.arrayBuffer());
 
-      // Upload to Cloudinary
-      const uploadResult = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.v2.uploader.upload_stream(
-          {
-            resource_type: "raw", // <-- change from "auto" to "raw"
-            public_id: `uploads/${Date.now()}_${file.name}`,
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        uploadStream.end(buffer);
-      });
+      // Unique filename to avoid collisions
+      const uniqueName = `${Date.now()}_${file.name}`;
+      const filePath = path.join(uploadDir, uniqueName);
 
-      // Save in DB (Prisma) and store public_id
+      // Save file locally
+      await fs.writeFile(filePath, buffer);
+
+      // Save file info in DB
       const created = await prisma.file.create({
         data: {
           filename: file.name,
           mimeType: file.type || "application/octet-stream",
           size: buffer.length,
-          url: uploadResult.secure_url,
-          publicId: uploadResult.public_id, // <-- store public_id
+          url: `/uploads/${uniqueName}`, // relative URL for frontend
+          publicId: uniqueName, // can use as unique identifier
           uploadedById: userPayload?.id || null,
         },
       });

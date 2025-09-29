@@ -1,17 +1,11 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { v2 as cloudinary } from "cloudinary";
+import { promises as fs } from "fs";
+import path from "path";
 
 const prisma = new PrismaClient();
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-// POST handler to delete file
+// POST handler to delete a file
 export async function POST(req, { params }) {
   try {
     const { id } = params;
@@ -23,37 +17,23 @@ export async function POST(req, { params }) {
       );
     }
 
-    // Get file record from database
+    // Find file record in DB
     const file = await prisma.file.findUnique({ where: { id } });
     if (!file) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Ensure publicId exists
-    if (!file.publicId) {
-      return NextResponse.json(
-        { error: "Cloudinary public_id missing in DB" },
-        { status: 400 }
-      );
+    // Delete file from public/uploads
+    if (file.url) {
+      const filePath = path.join(process.cwd(), "public", file.url);
+      try {
+        await fs.unlink(filePath);
+      } catch (err) {
+        console.warn("File already deleted or not found locally:", err.message);
+      }
     }
 
-    // Ensure resource_type exists
-    const resourceType = file.resourceType || "raw"; // fallback for unknown types
-
-    // Delete file from Cloudinary
-    const cloudRes = await cloudinary.uploader.destroy(file.publicId, {
-      resource_type: resourceType,
-    });
-
-    if (cloudRes.result !== "ok" && cloudRes.result !== "not found") {
-      console.error("Cloudinary delete response:", cloudRes);
-      return NextResponse.json(
-        { error: "Failed to delete file from Cloudinary" },
-        { status: 500 }
-      );
-    }
-
-    // Delete file from database
+    // Delete file record from DB
     const deletedFile = await prisma.file.delete({ where: { id } });
 
     return NextResponse.json(
