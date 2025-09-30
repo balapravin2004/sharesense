@@ -1,7 +1,6 @@
+"use client";
+
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
-import { setFiles, deleteFile as deleteFileAction } from "../store/uploadSlice";
 import {
   FiSearch,
   FiRefreshCcw,
@@ -10,7 +9,9 @@ import {
   FiShare2,
 } from "react-icons/fi";
 import { AiOutlineFile } from "react-icons/ai";
-import FullscreenFilesModal from "./FullscreenFilesModal";
+import { useDispatch, useSelector } from "react-redux";
+import { setFiles, deleteFile as deleteFileAction } from "../store/uploadSlice";
+import ImageModal from "./ImageModal";
 
 export default function FilesTable() {
   const dispatch = useDispatch();
@@ -18,14 +19,15 @@ export default function FilesTable() {
 
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
-  const [openFull, setOpenFull] = useState(false);
   const [selected, setSelected] = useState(new Set());
+  const [imageModal, setImageModal] = useState(null);
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/alluploadedfiles");
-      dispatch(setFiles(res.data.files || []));
+      const res = await fetch("/api/alluploadedfiles");
+      const data = await res.json();
+      dispatch(setFiles(data.files || []));
     } catch (e) {
       console.error(e);
     } finally {
@@ -52,21 +54,6 @@ export default function FilesTable() {
     return (size / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
   };
 
-  const shareFile = async (file) => {
-    const shareUrl = file.url;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: file.filename, url: shareUrl });
-      } catch {}
-    } else {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-      } catch (err) {
-        console.error("Copy failed:", err);
-      }
-    }
-  };
-
   const handleDelete = async (fileId) => {
     setSelected((prev) => new Set(prev).add(fileId));
     try {
@@ -75,8 +62,6 @@ export default function FilesTable() {
       if (!res.ok) throw new Error(data.error || "Delete failed");
 
       dispatch(deleteFileAction(fileId));
-
-      // Refetch all files after deletion
       await load();
     } catch (err) {
       console.error("Delete error:", err);
@@ -87,6 +72,20 @@ export default function FilesTable() {
         return newSet;
       });
     }
+  };
+
+  const handleClickFile = (file) => {
+    if (file.mimeType.startsWith("image/")) {
+      setImageModal(file);
+    }
+  };
+
+  const shareFile = async (file) => {
+    try {
+      if (navigator.share)
+        await navigator.share({ title: file.filename, url: file.url });
+      else await navigator.clipboard.writeText(file.url);
+    } catch {}
   };
 
   return (
@@ -120,7 +119,9 @@ export default function FilesTable() {
               <tr
                 key={f.id}
                 className="hover:bg-gray-50 hover:shadow-sm hover:scale-[1.01] transition-all duration-200">
-                <td className="px-3 py-4 flex items-center gap-3 break-all">
+                <td
+                  className="px-3 py-4 flex items-center gap-3 break-all cursor-pointer"
+                  onClick={() => handleClickFile(f)}>
                   <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-600 shadow-inner">
                     <AiOutlineFile className="text-lg" />
                   </div>
@@ -177,7 +178,9 @@ export default function FilesTable() {
           <div
             key={f.id}
             className="border rounded-xl p-3 bg-white shadow-sm hover:shadow-lg hover:scale-[1.01] transition-all">
-            <div className="flex items-start gap-3">
+            <div
+              className="flex items-start gap-3 cursor-pointer"
+              onClick={() => handleClickFile(f)}>
               <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-600 shadow-inner">
                 <AiOutlineFile size={16} />
               </div>
@@ -217,12 +220,12 @@ export default function FilesTable() {
         ))}
       </div>
 
-      {/* Fullscreen Modal */}
-      <FullscreenFilesModal
-        open={openFull}
-        onClose={() => setOpenFull(false)}
-        files={filtered}
-        reload={load}
+      {/* Image Modal */}
+      <ImageModal
+        open={!!imageModal}
+        src={imageModal?.url || imageModal}
+        alt={imageModal?.filename || "Image"}
+        onClose={() => setImageModal(null)}
       />
     </div>
   );
