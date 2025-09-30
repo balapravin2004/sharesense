@@ -30,13 +30,13 @@ export async function POST(req) {
         });
 
       if (error) throw error;
-      // adding more code
+
       // Get public URL
       const { data: publicUrl } = supabase.storage
         .from("uploads")
         .getPublicUrl(uniqueName);
 
-      // Save file metadata in DB
+      // Save metadata in DB
       const created = await prisma.file.create({
         data: {
           filename: file.name,
