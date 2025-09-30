@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-
+//adding comment here
 export default function ActiveRooms({ rooms }) {
   return (
     <div className="mb-6 w-full h-full overflow-auto p-2 rounded-lg shadow-sm bg-white border">
