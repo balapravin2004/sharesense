@@ -9,7 +9,7 @@ import { logoutUser } from "../store/authSlice"; // adjust path as needed
 /* --------------------- MOBILE TOPBAR --------------------- */
 const TopbarMobile = ({ wrapperRef, user, handleLogout }) => {
   return (
-    <div className="w-full transition-all duration-300 sidebar-gradient text-white px-4 py-3 flex justify-between items-center sticky top-0 md:hidden z-[200]">
+    <div className="w-full transition-all duration-300 sidebar-gradient text-white px-4 py-3 flex justify-between items-center sticky top-0 md:hidden z-[100]">
       <div className="text-xl font-bold tracking-wide">
         <Link href="/">ShareBro</Link>
       </div>
@@ -29,7 +29,7 @@ const TopbarMobile = ({ wrapperRef, user, handleLogout }) => {
 /* --------------------- DESKTOP TOPBAR --------------------- */
 const TopbarDesktop = ({ user, handleLogout }) => {
   return (
-    <div className="w-full transition-all duration-300 bg-transparent text-white px-4 py-3 justify-between items-center sticky top-0 hidden md:flex z-[200]">
+    <div className="w-full transition-all duration-300 bg-transparent text-white px-4 py-3 justify-between items-center sticky top-0 hidden md:flex z-[50]">
       <div className="text-xl font-bold tracking-wide">
         <Link href="/">ShareBro</Link>
       </div>
