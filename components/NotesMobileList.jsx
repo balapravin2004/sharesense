@@ -7,7 +7,9 @@ import { FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import toast from "react-hot-toast";
 
+// ✅ Utility function
 function timeAgo(timestamp) {
   if (!timestamp) return "—";
   const now = new Date();
@@ -42,26 +44,29 @@ export default function NotesMobileList({
     );
   };
 
-  // ✅ Bulk delete with Axios
+  // ✅ Bulk delete
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
     setBulkDeleting(true);
+
     try {
       await axios.post("/api/deletenotes", { ids: selectedIds });
       setSelectedIds([]);
-      fetchNotesFunction();
+      await fetchNotesFunction();
+      toast.success("Selected notes deleted");
     } catch (error) {
       console.error("Error bulk deleting notes:", error);
+      toast.error("Failed to delete notes");
     } finally {
       setBulkDeleting(false);
     }
   };
 
   return (
-    <div className="md:hidden p-1 mb-14 md:mb-auto overflow-auto max-h-[30rem]">
-      {/* Bulk delete header */}
+    <div className="md:hidden p-2 mb-14 md:mb-0 overflow-auto max-h-[30rem]">
+      {/* Bulk delete bar */}
       {selectedIds.length > 0 && (
-        <div className="flex justify-between items-center mb-3 p-2 bg-gray-50 border rounded sticky top-[-1px]">
+        <div className="flex justify-between items-center mb-3 p-2 bg-gray-50 border rounded sticky top-0 z-10">
           <span className="text-sm text-gray-600">
             {selectedIds.length} selected
           </span>
@@ -74,11 +79,12 @@ export default function NotesMobileList({
             ) : (
               <Trash2 className="w-4 h-4" />
             )}
-            Delete Selected
+            Delete
           </button>
         </div>
       )}
 
+      {/* Loading / Empty states */}
       {loading ? (
         <div className="flex items-center justify-center p-8 text-gray-500">
           <Loader2 className="animate-spin w-6 h-6" />
@@ -90,10 +96,10 @@ export default function NotesMobileList({
           {notes.map((note, index) => (
             <div
               key={note.id || index}
-              className={`bg-white border rounded-lg p-3 shadow-sm flex flex-col ${
+              className={`bg-white border rounded-lg p-3 shadow-sm transition ${
                 selectedIds.includes(note.id) ? "ring-2 ring-red-400" : ""
               }`}>
-              {/* Select Checkbox */}
+              {/* Header: Checkbox + Time */}
               <div className="flex justify-between items-center mb-2">
                 <input
                   type="checkbox"
@@ -107,7 +113,7 @@ export default function NotesMobileList({
 
               {/* Note Content */}
               <div
-                className="flex-1 p-1 align-top max-w-lg cursor-pointer hover:underline"
+                className="flex-1 p-1 cursor-pointer hover:underline"
                 onClick={() => router.push(`/notes/${note.id}`)}>
                 <div
                   className="text-sm text-gray-800"
@@ -117,8 +123,8 @@ export default function NotesMobileList({
                 />
               </div>
 
-              {/* Actions Row */}
-              <div className="flex justify-start items-center mt-3 pt-2 border-t">
+              {/* Action Buttons */}
+              <div className="flex justify-start items-center mt-3 pt-2 border-t gap-2">
                 {/* Upload */}
                 <button
                   onClick={async () => {
@@ -128,7 +134,7 @@ export default function NotesMobileList({
                         filterMode: currentFilter,
                       });
 
-                      fetchNotesFunction();
+                      await fetchNotesFunction();
 
                       if (res.data.success) {
                         toast.success("Uploaded to general section");
@@ -138,14 +144,14 @@ export default function NotesMobileList({
                       toast.error("Failed to upload note");
                     }
                   }}
-                  className="p-2 rounded bg-indigo-500 text-white flex items-center justify-center">
+                  className="p-2 rounded bg-indigo-500 text-white flex items-center justify-center hover:bg-indigo-600">
                   <Upload className="w-4 h-4" />
                 </button>
 
                 {/* Delete */}
                 <button
                   onClick={() => onDelete(note.id)}
-                  className="p-2 mx-2 rounded bg-red-500 text-white flex items-center justify-center">
+                  className="p-2 rounded bg-red-500 text-white flex items-center justify-center hover:bg-red-600">
                   {deletingId === note.id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
@@ -159,12 +165,13 @@ export default function NotesMobileList({
                     onClick={() =>
                       setShareNoteId(shareNoteId === note.id ? null : note.id)
                     }
-                    className="p-2 rounded bg-green-500 text-white flex items-center justify-center">
+                    className="p-2 rounded bg-green-500 text-white flex items-center justify-center hover:bg-green-600">
                     <Share2 className="w-4 h-4" />
                   </button>
 
+                  {/* Share menu */}
                   {shareNoteId === note.id && (
-                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 p-2 bg-white border rounded shadow-lg flex gap-3">
+                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 p-2 bg-white border rounded shadow-lg flex gap-3 z-20">
                       <WhatsappShareButton
                         url={`https://sharebhai.com/notes/${note.id}`}>
                         <FaWhatsapp className="text-green-600 w-6 h-6" />

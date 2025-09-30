@@ -33,7 +33,6 @@ export default function ChatPage() {
   };
 
   const handleSendMessage = (msg) => {
-    console.log("this is the final message send");
     if (!msg.trim() || !currentRoom) return;
     socket.emit("message", {
       room: currentRoom,
