@@ -5,12 +5,17 @@ import { supabase } from "../../../lib/supabase";
 
 export async function POST(req) {
   try {
-    const userPayload = getUserFromAuthHeader(req);
+    const userPayload = getUserFromAuthHeader(req); // may be null for PWA shares
 
     const formData = await req.formData();
-    const files = formData.getAll("files");
 
-    if (!files || files.length === 0) {
+    // Get all files regardless of field name
+    const files = [];
+    for (const entry of formData.values()) {
+      if (entry instanceof File) files.push(entry);
+    }
+
+    if (!files.length) {
       return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
     }
 
@@ -21,7 +26,6 @@ export async function POST(req) {
       const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const uniqueName = `${Date.now()}_${safeFileName}`;
 
-      // Upload to Supabase Storage bucket "uploads"
       const { data, error } = await supabase.storage
         .from("uploads")
         .upload(uniqueName, buffer, {
@@ -31,12 +35,10 @@ export async function POST(req) {
 
       if (error) throw error;
 
-      // Get public URL
       const { data: publicUrl } = supabase.storage
         .from("uploads")
         .getPublicUrl(uniqueName);
 
-      // Save metadata in DB
       const created = await prisma.file.create({
         data: {
           filename: file.name,
