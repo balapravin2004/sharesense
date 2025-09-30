@@ -3,16 +3,13 @@ import {
   Home,
   Lock,
   UserPlus,
-  Settings,
+  Info, // <- changed from Settings to Info
   PanelLeftClose,
   PanelLeftOpen,
   FileText,
   LogIn,
   Users,
 } from "lucide-react";
-import { useSelector } from "react-redux";
-
-import { selectUser } from "./authSlice";
 
 const initialState = {
   collapsed: false,
@@ -38,9 +35,9 @@ export const getNavItems = (state, dispatch) => {
     },
     { label: "Home", icon: Home, route: "/" },
     { label: "All Notes", icon: FileText, route: "/AllNotesPage" },
-    { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
+    // { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
     { label: "Make Room", icon: UserPlus, route: "/MakeRoomPage" },
-    { label: "Settings", icon: Settings, route: "/SettingsPage" },
+    { label: "Info", icon: Info, route: "/InfoPage" }, // <- updated
     { label: "Login", icon: LogIn, route: "/auth" },
   ];
 };
