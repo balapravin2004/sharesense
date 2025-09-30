@@ -1,15 +1,1 @@
 
-
-
-5. file 
-
-new updates ROSPL
-1. Overflow issue resolved for table
-2. home page dynamic height now the buttons are visible no crtl + -
-3. Made the UI little more professional and removed unwanted buttons in modal 
-4. shifted the upload modal to the left for the desktop view
-5. Removed the thead for the notes table
-6. Now the user can upload the images from the editor also 
-7. removed some useless buttons from the editor
-8. Now can delete images from the see images section
-9. All the file data decentralized in FILE table
