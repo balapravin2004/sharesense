@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { FiDownload } from "react-icons/fi";
 
 /**
  * Props:
  *  - sender
  *  - message (string)
- *  - file: optional { filename, mime, size, raw } // raw is ArrayBuffer/Buffer from socket or outgoing metadata
+ *  - file: optional { filename, mime, size, raw }
  *  - isOwnMessage
  */
 export default function ChatMessage({ sender, message, file, isOwnMessage }) {
@@ -52,12 +53,13 @@ export default function ChatMessage({ sender, message, file, isOwnMessage }) {
         isOwnMessage ? "justify-end" : "justify-start"
       } px-2 my-2`}>
       <div
-        className={`max-w-[85%] md:max-w-[70%] lg:max-w-[60%] p-3 rounded-xl shadow-md 
+        className={`max-w-[85%] md:max-w-[70%] lg:max-w-[60%] p-3 rounded-2xl shadow-md
           ${
-            isOwnMessage ? "bg-blue-50 text-gray-800" : "bg-white text-gray-900"
+            isOwnMessage
+              ? "bg-gradient-to-br from-purple-100 to-purple-200 text-gray-900 border-purple-300"
+              : "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-900 border-gray-300"
           }
-          border ${isOwnMessage ? "border-blue-200" : "border-gray-200"}
-          flex flex-col gap-2 transition-transform duration-200 hover:scale-[1.01]`}>
+          border flex flex-col gap-2 transition-transform duration-200 hover:scale-[1.02]`}>
         {/* Sender */}
         <div className="flex justify-between items-center">
           <span className="text-xs font-semibold text-gray-500">{sender}</span>
@@ -70,7 +72,7 @@ export default function ChatMessage({ sender, message, file, isOwnMessage }) {
 
         {/* File */}
         {file && (
-          <div className="mt-2 border rounded-lg p-2 bg-gray-50 flex flex-col md:flex-row md:items-center gap-3 shadow-inner">
+          <div className="mt-2 border rounded-xl p-2 bg-white flex flex-col md:flex-row md:items-center gap-3 shadow-inner">
             {/* File Info */}
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium truncate">
@@ -87,18 +89,18 @@ export default function ChatMessage({ sender, message, file, isOwnMessage }) {
                 <img
                   src={fileUrl}
                   alt={file.filename}
-                  className="w-24 h-24 object-cover rounded-lg border border-gray-200 shadow-sm hover:scale-105 transition-transform"
+                  className="w-24 h-24 object-cover rounded-lg border border-gray-300 shadow-sm hover:scale-105 transition-transform"
                 />
               </a>
             )}
 
-            {/* Download button only for received files */}
+            {/* Icon for download only if not own message */}
             {!isOwnMessage && fileUrl && (
               <a
                 href={fileUrl}
                 download={file.filename}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md font-medium shadow-sm transition-colors">
-                Download
+                className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-md transition-colors">
+                <FiDownload size={18} />
               </a>
             )}
           </div>
