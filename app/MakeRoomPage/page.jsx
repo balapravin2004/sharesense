@@ -146,7 +146,7 @@ export default function ChatPage() {
   }, [currentRoom, dispatch]);
 
   return (
-    <div className="w-full h-full flex flex-col md:flex-row p-4 md:p-6 bg-gray-50 gap-6">
+    <div className="w-full h-[90vh] flex flex-col md:flex-row p-4 md:p-6 bg-gray-50 gap-6">
       {!currentRoom ? (
         <>
           {/* Left Side: Join Form */}

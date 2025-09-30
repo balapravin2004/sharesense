@@ -21,7 +21,7 @@ export default function ChatWindow({
   const roomMessages = messages[currentRoom] || [];
 
   return (
-    <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg overflow-hidden max-h-[95vh]">
+    <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg overflow-hidden h-full mb-[2rem] md:m-auto">
       {/* Header */}
       <div className="flex justify-between items-center bg-blue-600 text-white px-4 py-3">
         <h2 className="font-bold text-lg">Room: {currentRoom}</h2>
@@ -33,7 +33,7 @@ export default function ChatWindow({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 h-[10rem] ">
         {roomMessages.map((m, idx) => (
           <div key={idx} className="">
             <ChatMessage
