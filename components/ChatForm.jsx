@@ -51,8 +51,8 @@ export default function ChatForm({ onSendMessage }) {
     <form
       onSubmit={send}
       className="flex items-center gap-2 p-3 bg-white border-t w-full">
-      {/* Input + file attachment */}
-      <div className="flex items-center flex-1 gap-2 min-w-0">
+      {/* Input + file attachment + preview */}
+      <div className="flex items-center flex-1 gap-2 min-w-0 relative">
         <input
           type="text"
           placeholder="Write a message..."
@@ -61,6 +61,7 @@ export default function ChatForm({ onSendMessage }) {
           className="flex-1 px-4 py-2 rounded-full border focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-0 truncate"
         />
 
+        {/* File attachment */}
         <label className="inline-flex items-center cursor-pointer">
           <input
             id="chat-file-input"
@@ -72,25 +73,25 @@ export default function ChatForm({ onSendMessage }) {
             <FiPaperclip size={22} />
           </span>
         </label>
-      </div>
 
-      {/* File preview (optional) */}
-      {file && (
-        <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full max-w-[180px] sm:max-w-[200px] truncate">
-          <div className="text-sm truncate">{file.name}</div>
-          <button
-            type="button"
-            onClick={cancelFile}
-            className="text-red-500 p-1 rounded hover:bg-gray-200 transition-colors">
-            <FiX size={16} />
-          </button>
-        </div>
-      )}
+        {/* File preview (absolute inside input area) */}
+        {file && (
+          <div className="absolute left-2 bottom-12 flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full max-w-[200px] truncate shadow-md">
+            <div className="text-sm truncate">{file.name}</div>
+            <button
+              type="button"
+              onClick={cancelFile}
+              className="text-red-500 p-1 rounded hover:bg-gray-200 transition-colors flex-shrink-0">
+              <FiX size={16} />
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Send button */}
       <button
         type="submit"
-        className="ml-auto bg-blue-600 hover:bg-blue-700 transition-colors text-white p-3 rounded-full flex items-center justify-center flex-shrink-0">
+        className="ml-2 bg-blue-600 hover:bg-blue-700 transition-colors text-white p-3 rounded-full flex items-center justify-center flex-shrink-0">
         <FiSend size={22} />
       </button>
     </form>
