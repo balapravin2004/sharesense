@@ -1,11 +1,7 @@
 
 
 
-5. file sharing in chatting application
-6. secure share with temp storage (timer delete)
-9. add password in room createion as option
-10.files upload filter as general both and personal
-12. real time documentation feature
+5. file 
 
 new updates ROSPL
 1. Overflow issue resolved for table
