@@ -16,6 +16,7 @@ export default function EditorsSection() {
   const [isUploading, setIsUploading] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
   const [activeButton, setActiveButton] = useState("general");
+  const [editorHeight, setEditorHeight] = useState(300);
 
   // ✅ Load activeButton from localStorage safely
   useEffect(() => {
@@ -25,11 +26,20 @@ export default function EditorsSection() {
     }
   }, []);
 
+  // ✅ Dynamic editor height (screen height - 200)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const updateHeight = () => {
+        setEditorHeight(window.innerHeight - 500);
+      };
+      updateHeight();
+      window.addEventListener("resize", updateHeight);
+      return () => window.removeEventListener("resize", updateHeight);
+    }
+  }, []);
+
   const gradientBtn =
     "px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-90 transition";
-
-  const activeStyle =
-    "bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 border-2 border-black";
 
   // Save activeness to localStorage
   const handleSetActiveButton = (type) => {
@@ -52,8 +62,8 @@ export default function EditorsSection() {
       const payload = {
         content,
         mode: activeButton,
-        userId: user?.id || null, // authorId
-        userName: user?.name || null, // authorName
+        userId: user?.id || null,
+        userName: user?.name || null,
       };
 
       const res = await axios.post("/api/notes", payload);
@@ -72,7 +82,6 @@ export default function EditorsSection() {
     }
   };
 
-  // Receive the latest note
   // Receive the latest note
   const handleReceive = async () => {
     setIsReceiving(true);
@@ -98,12 +107,15 @@ export default function EditorsSection() {
 
   return (
     <div className="flex flex-col bg-white rounded-lg shadow p-3 gap-4">
-      <FroalaEditor value={content} onChange={setContent} />
+      {/* ✅ Passing dynamic editorHeight */}
+      <FroalaEditor
+        value={content}
+        onChange={setContent}
+        editorHeight={editorHeight}
+      />
 
       {/* Buttons line */}
-      {/* Buttons line */}
       <div className="flex flex-row flex-wrap gap-4 md:justify-between">
-        {/* Row 1: Upload & Receive */}
         <div className="flex gap-3">
           <button
             className={gradientBtn}
@@ -118,7 +130,7 @@ export default function EditorsSection() {
             disabled={isReceiving || isUploading}>
             {isReceiving ? "Receiving..." : "Receive"}
           </button>
-          {/* Row 3: View All */}
+
           <Link
             href="/AllNotesPage"
             className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition w-fit">
@@ -126,18 +138,17 @@ export default function EditorsSection() {
           </Link>
         </div>
 
-        {/* Row 2: Filters (only for authenticated users) */}
         {isAuthenticated && (
           <div className="flex gap-2 flex-wrap">
             {["general", "both", "user"].map((type) => (
               <button
                 key={type}
                 className={`px-3 py-1 rounded-full border text-sm font-medium transition
-            ${
-              activeButton === type
-                ? "bg-indigo-500 text-white border-indigo-500"
-                : "text-gray-600 border-gray-300 hover:bg-gray-100"
-            }`}
+              ${
+                activeButton === type
+                  ? "bg-indigo-500 text-white border-indigo-500"
+                  : "text-gray-600 border-gray-300 hover:bg-gray-100"
+              }`}
                 onClick={() => handleSetActiveButton(type)}>
                 {type === "general"
                   ? "General"

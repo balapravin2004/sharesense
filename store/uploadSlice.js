@@ -58,13 +58,17 @@ export const deleteFile =
   ({ id, token }) =>
   async (dispatch) => {
     try {
-      await axios.delete(`/api/deletefile/${id}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      const res = await fetch(`/api/deletefile/${id}`, {
+        method: "DELETE",
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {},
       });
       dispatch(removeFile(id));
     } catch (e) {
       console.error("Delete failed", e);
-      // optionally: dispatch an error action or toast
     }
   };
 

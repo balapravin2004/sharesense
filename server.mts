@@ -27,7 +27,7 @@ app.prepare().then(() => {
   const activeRooms: ActiveRooms = {};
 
   io.on("connection", (socket: Socket) => {
-    console.log(`✅ User connected: ${socket.id}`);
+    // console.log(`✅ User connected: ${socket.id}`);
 
     socket.onAny((event, ...args) => console.log("📡 Event:", event, args));
 
