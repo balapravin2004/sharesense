@@ -1,12 +1,10 @@
-1. Delete files from supabase
-2. images upload and delete
-4. multiple files delete
+
+
+
 5. file sharing in chatting application
-6. secure share 
-7. zoom error resolve 
+6. secure share with temp storage (timer delete)
 9. add password in room createion as option
 10.files upload filter as general both and personal
-11. remove the drag and drop div in the upload section
 12. real time documentation feature
 
 new updates ROSPL
@@ -15,4 +13,7 @@ new updates ROSPL
 3. Made the UI little more professional and removed unwanted buttons in modal 
 4. shifted the upload modal to the left for the desktop view
 5. Removed the thead for the notes table
-6. 
+6. Now the user can upload the images from the editor also 
+7. removed some useless buttons from the editor
+8. Now can delete images from the see images section
+9. All the file data decentralized in FILE table
