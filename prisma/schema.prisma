@@ -25,7 +25,7 @@ model File {
   mimeType       String
   size           Int
   url            String
-  publicId       String         // <-- store Cloudinary public_id here
+  publicId       String         
   uploadedBy     User?          @relation(fields: [uploadedById], references: [id])
   uploadedById   String?
   isAnonymous    Boolean        @default(false)

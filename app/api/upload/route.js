@@ -18,18 +18,19 @@ export async function POST(req) {
 
     for (const file of files) {
       const buffer = Buffer.from(await file.arrayBuffer());
-      const uniqueName = `${Date.now()}_${file.name}`;
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const uniqueName = `${Date.now()}_${safeFileName}`;
 
       // Upload to Supabase Storage bucket "uploads"
       const { data, error } = await supabase.storage
         .from("uploads")
         .upload(uniqueName, buffer, {
           contentType: file.type || "application/octet-stream",
-          upsert: false,
+          upsert: true,
         });
 
       if (error) throw error;
-        // adding more code
+      // adding more code
       // Get public URL
       const { data: publicUrl } = supabase.storage
         .from("uploads")

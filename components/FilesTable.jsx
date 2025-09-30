@@ -92,38 +92,40 @@ export default function FilesTable() {
   return (
     <div className="w-full">
       {/* Top Controls */}
-      <div className="sticky top-0 bg-white z-20 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200">
+      <div className="sticky top-0 bg-white z-20 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b shadow-sm rounded-b-xl transition-all duration-200 hover:shadow-md">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-72">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search files..."
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full pl-10 pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
             />
             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
           <button
             onClick={load}
             title="Refresh"
-            className="px-3 py-2 rounded-lg bg-white border shadow-sm hover:bg-gray-50 flex items-center gap-2">
+            className="px-3 py-2 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 border shadow hover:shadow-md hover:scale-[1.02] flex items-center gap-2 transition-all">
             <FiRefreshCcw />
           </button>
         </div>
       </div>
 
       {/* Desktop Table */}
-      <div className="bg-white rounded-xl shadow p-4 border border-gray-200 hidden md:block max-h-[30rem] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-md p-4 border border-gray-100 hidden md:block max-h-[30rem] overflow-y-auto transition-all hover:shadow-xl">
         <table className="w-full table-auto text-sm border-collapse">
           <tbody>
             {filtered.map((f) => (
               <tr
                 key={f.id}
-                className="hover:bg-gray-50 hover:scale-[1.01] transition-all duration-200">
+                className="hover:bg-gray-50 hover:shadow-sm hover:scale-[1.01] transition-all duration-200">
                 <td className="px-3 py-4 flex items-center gap-3 break-all">
-                  <AiOutlineFile className="text-xl text-gray-600 flex-shrink-0" />
+                  <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-600 shadow-inner">
+                    <AiOutlineFile className="text-lg" />
+                  </div>
                   <div>
-                    <div className="font-medium">
+                    <div className="font-medium text-gray-800">
                       {f.filename} ({humanFileSize(f.size)})
                     </div>
                     <div className="text-xs text-gray-400">
@@ -135,18 +137,18 @@ export default function FilesTable() {
                   <div className="flex justify-end items-center gap-2">
                     <a
                       href={f.url}
-                      download={f.filename} // ensures download
-                      className="p-2 border rounded hover:bg-gray-50 flex items-center justify-center">
+                      download={f.filename}
+                      className="p-2 border rounded-lg hover:bg-gray-50 hover:shadow transition-all flex items-center justify-center">
                       <FiDownload />
                     </a>
                     <button
                       onClick={() => shareFile(f)}
-                      className="p-2 border rounded hover:bg-gray-50">
+                      className="p-2 border rounded-lg hover:bg-gray-50 hover:shadow transition-all">
                       <FiShare2 />
                     </button>
                     <button
                       onClick={() => handleDelete(f.id)}
-                      className="p-2 border rounded hover:bg-red-50 text-red-600 flex items-center justify-center"
+                      className="p-2 border rounded-lg hover:bg-red-50 hover:shadow text-red-600 flex items-center justify-center transition-all"
                       disabled={selected.has(f.id)}>
                       {selected.has(f.id) ? (
                         <div className="w-4 h-4 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></div>
@@ -170,40 +172,42 @@ export default function FilesTable() {
       </div>
 
       {/* Mobile cards */}
-      <div className="md:hidden space-y-3 overflow-auto max-h-[30rem] mb-[3rem]">
+      <div className="md:hidden space-y-3 overflow-auto max-h-[25rem] mb-[2rem]">
         {filtered.map((f) => (
-          <div key={f.id} className="border rounded-lg p-3 bg-white shadow-sm">
+          <div
+            key={f.id}
+            className="border rounded-xl p-3 bg-white shadow-sm hover:shadow-lg hover:scale-[1.01] transition-all">
             <div className="flex items-start gap-3">
-              <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center text-xl text-gray-600">
-                <AiOutlineFile />
+              <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-600 shadow-inner">
+                <AiOutlineFile size={16} />
               </div>
               <div className="flex-1">
-                <div className="font-medium break-all">
+                <div className="font-medium break-all text-[0.7rem] leading-tight text-gray-800">
                   {f.filename} ({humanFileSize(f.size)})
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-[0.65rem] text-gray-500">
                   {f.description || "—"}
                 </div>
-                <div className="mt-2 flex items-center gap-2">
+                <div className="mt-1 flex items-center gap-1">
                   <a
                     href={f.url}
-                    download={f.filename} // ensures download
-                    className="p-2 border rounded hover:bg-gray-50 flex items-center justify-center">
-                    <FiDownload />
+                    download={f.filename}
+                    className="p-1 border rounded-md hover:bg-gray-50 hover:shadow flex items-center justify-center transition-all">
+                    <FiDownload size={14} />
                   </a>
                   <button
                     onClick={() => shareFile(f)}
-                    className="p-2 border rounded hover:bg-gray-50">
-                    <FiShare2 />
+                    className="p-1 border rounded-md hover:bg-gray-50 hover:shadow flex items-center justify-center transition-all">
+                    <FiShare2 size={14} />
                   </button>
                   <button
                     onClick={() => handleDelete(f.id)}
-                    className="p-2 border rounded hover:bg-red-50 text-red-600 flex items-center justify-center"
+                    className="p-1 border rounded-md hover:bg-red-50 hover:shadow text-red-600 flex items-center justify-center transition-all"
                     disabled={selected.has(f.id)}>
                     {selected.has(f.id) ? (
-                      <div className="w-4 h-4 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></div>
+                      <div className="w-3 h-3 border-2 border-t-transparent border-red-600 rounded-full animate-spin"></div>
                     ) : (
-                      <FiTrash2 />
+                      <FiTrash2 size={14} />
                     )}
                   </button>
                 </div>
