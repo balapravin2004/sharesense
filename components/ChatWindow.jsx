@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { ChatForm, ChatMessage } from "../components/index";
+import ChatForm from "./ChatForm";
+import ChatMessage from "./ChatMessage";
 
 export default function ChatWindow({
   currentRoom,
@@ -17,8 +18,10 @@ export default function ChatWindow({
 
   useEffect(scrollToBottom, [messages, currentRoom]);
 
+  const roomMessages = messages[currentRoom] || [];
+
   return (
-    <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg overflow-hidden max-h-[80vh]">
+    <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg overflow-hidden max-h-[95vh]">
       {/* Header */}
       <div className="flex justify-between items-center bg-blue-600 text-white px-4 py-3">
         <h2 className="font-bold text-lg">Room: {currentRoom}</h2>
@@ -30,26 +33,18 @@ export default function ChatWindow({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
-        {messages[currentRoom]?.map((m, idx) => (
-          <div
-            key={idx}
-            className={`${
-              m.highlight
-                ? "bg-yellow-100 text-yellow-900 font-semibold text-center py-1 rounded"
-                : ""
-            }`}>
-            {!m.highlight ? (
-              <ChatMessage
-                sender={m.sender}
-                message={m.message}
-                isOwnMessage={m.sender === localName}
-              />
-            ) : (
-              <p>{m.message}</p>
-            )}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+        {roomMessages.map((m, idx) => (
+          <div key={idx} className="">
+            <ChatMessage
+              sender={m.sender}
+              message={m.message}
+              file={m.file}
+              isOwnMessage={m.sender === localName}
+            />
           </div>
         ))}
+
         <div ref={messagesEndRef} />
       </div>
 

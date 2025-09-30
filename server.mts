@@ -21,6 +21,7 @@ app.prepare().then(() => {
       origin: "*", // replace with your frontend URL in production
       methods: ["GET", "POST"],
     },
+    // allow binary transports by default
   });
 
   // Track rooms and users
@@ -91,7 +92,35 @@ app.prepare().then(() => {
         sender: string;
         message: string;
       }) => {
-        io.to(room).emit("message", { sender, message });
+        io.to(room).emit("message", { room, sender, message });
+      }
+    );
+
+    // File upload (binary)
+    socket.on(
+      "file",
+      (payload: {
+        room: string;
+        sender: string;
+        filename: string;
+        mime: string;
+        size: number;
+        file: any; // binary (Buffer/ArrayBuffer)
+      }) => {
+        try {
+          // broadcast to room
+          // note: socket.io will handle binary payloads
+          io.to(payload.room).emit("file", {
+            room: payload.room,
+            sender: payload.sender,
+            filename: payload.filename,
+            mime: payload.mime,
+            size: payload.size,
+            file: payload.file, // binary
+          });
+        } catch (err) {
+          console.error("file handling error", err);
+        }
       }
     );
 

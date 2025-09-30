@@ -10,7 +10,7 @@ export default function ChatRoomForm({
   onJoin,
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 max-w-[98vw]">
       <input
         type="text"
         placeholder="Enter your name"
