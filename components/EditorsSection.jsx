@@ -30,7 +30,7 @@ export default function EditorsSection() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const updateHeight = () => {
-        setEditorHeight(window.innerHeight - 500);
+        setEditorHeight(window.innerHeight - 350);
       };
       updateHeight();
       window.addEventListener("resize", updateHeight);

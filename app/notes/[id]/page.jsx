@@ -13,8 +13,18 @@ export default function NotePage() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-
+  const [editorHeight, setEditorHeight] = useState(300);
   // Fetch the note from backend
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const updateHeight = () => {
+        setEditorHeight(window.innerHeight - 350);
+      };
+      updateHeight();
+      window.addEventListener("resize", updateHeight);
+      return () => window.removeEventListener("resize", updateHeight);
+    }
+  }, []);
   useEffect(() => {
     const fetchNote = async () => {
       try {
@@ -72,7 +82,7 @@ export default function NotePage() {
         <FroalaEditor
           value={content}
           onChange={setContent}
-          editorHeight={450}
+          editorHeight={editorHeight}
         />
       )}
 
