@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GiArtificialIntelligence } from "react-icons/gi";
+import { BsRobot } from "react-icons/bs";
 import { CgMaximizeAlt } from "react-icons/cg";
 import { TbArrowsMinimize } from "react-icons/tb";
 import { TbWindowMinimize } from "react-icons/tb"
@@ -60,7 +60,7 @@ const GeminiChatBot = () => {
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg">
-          <GiArtificialIntelligence className="w-6 h-6" />
+          <BsRobot className="w-6 h-6" />
         </motion.button>
       </div>
 
@@ -72,7 +72,7 @@ const GeminiChatBot = () => {
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg">
-          <GiArtificialIntelligence className="w-6 h-6" />
+          <BsRobot className="w-6 h-6" />
         </motion.button>
       </div>
 
