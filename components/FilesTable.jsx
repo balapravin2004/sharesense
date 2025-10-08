@@ -92,27 +92,28 @@ export default function FilesTable() {
     <div className="w-full">
       {/* Top Controls */}
       <div className="sticky top-0 bg-white z-20 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b shadow-sm rounded-b-xl transition-all duration-200 hover:shadow-md">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-72">
+        <div className="flex justify-start items-center w-full border border-none p-2">
+          <div className="relative w-[calc(100%-3rem)] sm:w-[18rem]">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search files..."
               className="w-full pl-10 pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
             />
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
+
           <button
             onClick={load}
             title="Refresh"
-            className="px-3 py-2 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 border shadow hover:shadow-md hover:scale-[1.02] flex items-center gap-2 transition-all">
+            className="ml-2 w-10 h-10 flex items-center justify-center rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 border shadow hover:shadow-md hover:scale-[1.02] transition-all">
             <FiRefreshCcw />
           </button>
         </div>
       </div>
 
       {/* Desktop Table */}
-      <div className="bg-white rounded-2xl shadow-md p-4 border border-gray-100 hidden md:block max-h-[30rem] overflow-y-auto transition-all hover:shadow-xl">
+      <div className="bg-white rounded-2xl shadow-md p-4 border border-gray-100 hidden md:block max-h-[52vh] overflow-y-auto transition-all hover:shadow-xl">
         <table className="w-full table-auto text-sm border-collapse">
           <tbody>
             {filtered.map((f) => (
