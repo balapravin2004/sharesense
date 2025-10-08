@@ -126,7 +126,7 @@ export default function FilesTable() {
                   </div>
                   <div>
                     <div
-                      className="font-medium text-gray-800 border border-black"
+                      className="font-medium text-gray-800 border border-none"
                       onClick={() => handleClickFile(f)}>
                       {f.filename} ({humanFileSize(f.size)})
                     </div>
@@ -186,7 +186,7 @@ export default function FilesTable() {
               </div>
               <div className="flex-1">
                 <div
-                  className="font-medium break-all text-[0.7rem] leading-tight text-gray-800 border border-black"
+                  className="font-medium break-all text-[0.7rem] leading-tight text-gray-800 border border-none"
                   onClick={() => handleClickFile(f)}>
                   {f.filename} ({humanFileSize(f.size)})
                 </div>
