@@ -120,14 +120,14 @@ export default function FilesTable() {
               <tr
                 key={f.id}
                 className="hover:bg-gray-50 hover:shadow-sm hover:scale-[1.01] transition-all duration-200">
-                <td
-                  className="px-3 py-4 flex items-center gap-3 break-all cursor-pointer"
-                  onClick={() => handleClickFile(f)}>
+                <td className="px-3 py-4 flex items-center gap-3 break-all cursor-pointer">
                   <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-600 shadow-inner">
                     <AiOutlineFile className="text-lg" />
                   </div>
                   <div>
-                    <div className="font-medium text-gray-800">
+                    <div
+                      className="font-medium text-gray-800 border border-black"
+                      onClick={() => handleClickFile(f)}>
                       {f.filename} ({humanFileSize(f.size)})
                     </div>
                     <div className="text-xs text-gray-400">
@@ -140,7 +140,8 @@ export default function FilesTable() {
                     <a
                       href={f.url}
                       download={f.filename}
-                      className="p-2 border rounded-lg hover:bg-gray-50 hover:shadow transition-all flex items-center justify-center">
+                      target="_blank"
+                      className="p-2 border rounded-lg hover:bg-gray-50 hover:shadow transition-all flex items-center justify-center cursor-pointer">
                       <FiDownload />
                     </a>
                     <button
@@ -179,14 +180,14 @@ export default function FilesTable() {
           <div
             key={f.id}
             className="border rounded-xl p-3 bg-white shadow-sm hover:shadow-lg hover:scale-[1.01] transition-all">
-            <div
-              className="flex items-start gap-3 cursor-pointer"
-              onClick={() => handleClickFile(f)}>
+            <div className="flex items-start gap-3 cursor-pointer">
               <div className="w-9 h-9 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center text-gray-600 shadow-inner">
                 <AiOutlineFile size={16} />
               </div>
               <div className="flex-1">
-                <div className="font-medium break-all text-[0.7rem] leading-tight text-gray-800">
+                <div
+                  className="font-medium break-all text-[0.7rem] leading-tight text-gray-800 border border-black"
+                  onClick={() => handleClickFile(f)}>
                   {f.filename} ({humanFileSize(f.size)})
                 </div>
                 <div className="text-[0.65rem] text-gray-500">
@@ -196,6 +197,7 @@ export default function FilesTable() {
                   <a
                     href={f.url}
                     download={f.filename}
+                    target="_blank"
                     className="p-1 border rounded-md hover:bg-gray-50 hover:shadow flex items-center justify-center transition-all">
                     <FiDownload size={14} />
                   </a>
