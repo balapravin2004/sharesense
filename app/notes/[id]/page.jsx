@@ -87,7 +87,7 @@ export default function NotePage() {
       )}
 
       {/* Sticky Back Button aligned left */}
-      <div className="sticky bottom-[1rem] flex justify-start border border-none">
+      <div className="sticky bottom-4 flex justify-start border border-none">
         <button
           onClick={() => router.push("/AllNotesPage")}
           className="z-[100] w-12 h-12 flex items-center justify-center 

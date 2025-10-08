@@ -3,7 +3,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUp, X, ChevronLeft } from "lucide-react";
+import { GiArtificialIntelligence } from "react-icons/gi";
+import { CgMaximizeAlt } from "react-icons/cg";
+import { TbArrowsMinimize } from "react-icons/tb";
+import { TbWindowMinimize } from "react-icons/tb"
 
 const GeminiChatBot = () => {
   const [showGemini, setShowGemini] = useState(false);
@@ -57,7 +60,7 @@ const GeminiChatBot = () => {
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg">
-          <ChevronUp className="w-6 h-6" />
+          <GiArtificialIntelligence className="w-6 h-6" />
         </motion.button>
       </div>
 
@@ -69,7 +72,7 @@ const GeminiChatBot = () => {
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg">
-          <ChevronLeft className="w-6 h-6" />
+          <GiArtificialIntelligence className="w-6 h-6" />
         </motion.button>
       </div>
 
@@ -97,7 +100,7 @@ const GeminiChatBot = () => {
                   <button
                     onClick={() => setFullscreen(!fullscreen)}
                     className="hover:text-gray-300 transition">
-                    {fullscreen ? "🗗" : "🗖"}
+                    {fullscreen ? <TbArrowsMinimize /> : <CgMaximizeAlt />}
                   </button>
                 )}
                 <button
@@ -106,7 +109,7 @@ const GeminiChatBot = () => {
                     setShowGemini(false);
                   }}
                   className="hover:text-gray-300 transition">
-                  <X className="w-5 h-5" />
+                  <TbWindowMinimize className="w-5 h-5" />
                 </button>
               </div>
             </div>
