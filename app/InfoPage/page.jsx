@@ -32,13 +32,13 @@ export default function Page() {
             <span className="font-semibold text-gray-900">
               ShareBro is a secure, lightning-fast note-taking and file-sharing
               platform
-            </span>{" "}
+            </span>
             designed to make collaboration effortless. Unlike traditional
             methods that rely on WhatsApp QR scanning or email attachments,
-            ShareBro lets you{" "}
+            ShareBro lets you
             <span className="font-semibold text-blue-600">
               instantly share notes and files
-            </span>{" "}
+            </span>
             with anyone, anywhere, on any device.
           </p>
 

@@ -1,45 +1,43 @@
-// app/api/gemini/route.js
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-export const config = { runtime: "edge" }; // for faster serverless edge execution
+export const config = { runtime: "edge" };
 
 export async function POST(req) {
-  const { prompt, streaming } = await req.json();
-
-  if (!prompt) {
-    return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
-  }
-
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Missing Gemini API Key" },
-      { status: 500 }
-    );
-  }
-
-  const client = new GoogleGenerativeAI(apiKey);
-  const model = client.getGenerativeModel({
-    // model: "models/gemini-1.0-pro",
-    model: "models/gemini-1.5-flash-latest",
-  });
-
   try {
+    const { prompt, streaming } = await req.json();
+
+    if (!prompt) {
+      return NextResponse.json(
+        { error: "Prompt is required" },
+        { status: 400 }
+      );
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "Missing Gemini API Key" },
+        { status: 500 }
+      );
+    }
+
+    const client = new GoogleGenerativeAI(apiKey);
+    const model = client.getGenerativeModel({
+      model: "models/gemini-2.5-flash", // ✅ update this line
+    });
+
     if (streaming) {
       const streamResult = await model.generateContentStream({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
       });
 
       const encoder = new TextEncoder();
-      let aggregated = "";
-
       const stream = new ReadableStream({
         async start(controller) {
           for await (const chunk of streamResult.stream) {
-            const textPart = chunk.completion?.text || "";
-            aggregated += textPart;
+            const textPart =
+              chunk?.candidates?.[0]?.content?.parts?.[0]?.text || "";
             controller.enqueue(encoder.encode(textPart));
           }
           controller.close();
@@ -58,6 +56,9 @@ export async function POST(req) {
     }
   } catch (err) {
     console.error("Gemini error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: err?.message || "Unknown error" },
+      { status: 500 }
+    );
   }
 }
