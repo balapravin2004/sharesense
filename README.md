@@ -15,8 +15,8 @@
 
 |                      Preview 1                      |                      Preview 2                      |                      Preview 3                      |
 | :-------------------------------------------------: | :-------------------------------------------------: | :-------------------------------------------------: |
-| ![Mobile 1](./ScreenShots/MarkupImage/Mobile/1.png) | ![Mobile 2](./ScreenShots/MarkupImage/Mobile/2.png) | ![Mobile 3](./ScreenShots/MarkupImage/Mobile/3.png) |
-| ![Mobile 4](./ScreenShots/MarkupImage/Mobile/4.png) | ![Mobile 5](./ScreenShots/MarkupImage/Mobile/5.png) | ![Mobile 6](./ScreenShots/MarkupImage/Mobile/6.png) |
-| ![Mobile 7](./ScreenShots/MarkupImage/Mobile/7.png) |                                                     |                                                     |
+| ![Mobile 1](./ScreenShots/MarkupImage/mobile/1.png) | ![Mobile 2](./ScreenShots/MarkupImage/mobile/2.png) | ![Mobile 3](./ScreenShots/MarkupImage/mobile/3.png) |
+| ![Mobile 4](./ScreenShots/MarkupImage/mobile/4.png) | ![Mobile 5](./ScreenShots/MarkupImage/mobile/5.png) | ![Mobile 6](./ScreenShots/MarkupImage/mobile/6.png) |
+| ![Mobile 7](./ScreenShots/MarkupImage/mobile/7.png) |                                                     |                                                     |
 
 ---
