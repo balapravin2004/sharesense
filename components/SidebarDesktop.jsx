@@ -14,11 +14,12 @@ export default function SidebarDesktop() {
 
   return (
     <div
-      className={`hidden md:flex h-screen text-white p-4 flex-col justify-between bg-transparent transition-all duration-300 border-none ${
+      className={`hidden md:flex h-screen text-white p-4 flex-col bg-transparent transition-all duration-300 border-none ${
         state.collapsed ? "w-20" : "w-60"
       }`}>
-      <div className="max-h-[50rem] h-full flex flex-col justify-between items-center w-full border border-none">
-        <div className="flex-1 w-full">
+      <div className="max-h-[50rem] h-full flex flex-col items-center w-full border-none">
+        {/* Nav items section */}
+        <div className="w-full">
           <NavList
             items={navItems}
             pathname={pathname}
@@ -26,11 +27,12 @@ export default function SidebarDesktop() {
           />
         </div>
 
-        <div className="w-full h-40 mt-4 overflow-hidden border border-none">
+        {/* QR image placed directly below NavList */}
+        <div className="w-full mt-6 overflow-hidden border-none">
           <img
             src="/media/images/QRcode.png"
             alt="QR Code"
-            className="w-full h-full object-contain rounded-xl border border-none"
+            className="w-full h-auto object-contain rounded-xl"
           />
         </div>
       </div>
