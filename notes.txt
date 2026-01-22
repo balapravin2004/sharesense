@@ -1,1 +1,2 @@
-
+1. Connect cloud data  (full supabase)
+2. change base prompt

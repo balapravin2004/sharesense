@@ -11,7 +11,7 @@ pnpm-lock.yaml
 out
 .env
 
-# Production files
+# `duction files
 build
 dist
 
@@ -35,3 +35,5 @@ Thumbs.db
 *.tgz
 
 /app/generated/prisma
+./notes.txt
+notes.txt
