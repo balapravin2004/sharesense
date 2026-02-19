@@ -1,16 +1,13 @@
 # Dependencies
 node_modules
-/node_modules
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
 # Build output
 .next
-/.next
 out
-.env
-.env
+venv/
+.venv
 
 # `duction files
 build

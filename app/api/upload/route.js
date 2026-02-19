@@ -12,7 +12,9 @@ export async function POST(req) {
     // Get all files regardless of field name
     const files = [];
     for (const entry of formData.values()) {
-      if (entry instanceof File) files.push(entry);
+      if (entry && typeof entry === 'object' && entry.name && entry.arrayBuffer) {
+        files.push(entry);
+      }
     }
 
     if (!files.length) {
