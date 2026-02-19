@@ -10,7 +10,7 @@ export default function ChatRoomForm({
   onJoin,
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 max-w-[98vw]">
       <input
         type="text"
         placeholder="Enter your name"
@@ -27,7 +27,7 @@ export default function ChatRoomForm({
       />
       <button
         onClick={onJoin}
-        className="sidebar-gradient text-white font-semibold py-2 rounded shadow w-full">
+        className="sidebar-gradient text-white font-semibold py-2 shadow w-full rounded-md">
         Join Room
       </button>
     </div>

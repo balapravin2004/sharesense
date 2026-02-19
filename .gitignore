@@ -1,17 +1,15 @@
 # Dependencies
 node_modules
-/node_modules
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
 # Build output
 .next
-/.next
 out
-.env
+venv/
+.venv
 
-# Production files
+# `duction files
 build
 dist
 
@@ -35,3 +33,5 @@ Thumbs.db
 *.tgz
 
 /app/generated/prisma
+./notes.txt
+notes.txt

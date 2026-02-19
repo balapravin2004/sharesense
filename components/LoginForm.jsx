@@ -13,7 +13,11 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({
+      ...form,
+      [name]: name === "email" ? value.toLowerCase() : value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -23,10 +27,9 @@ const LoginForm = () => {
     try {
       const resAction = await dispatch(loginUser(form));
       if (loginUser.fulfilled.match(resAction)) {
-        toast.success("Logged in successfully!");
         router.replace("/");
       } else {
-        toast.error(resAction.payload || "Login failed");
+        console.log(resAction.payload || "Login failed");
       }
     } catch (error) {
       toast.error("Login failed. Try again.");

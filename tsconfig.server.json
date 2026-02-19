@@ -7,7 +7,10 @@
     "moduleResolution": "Node",
     "strict": true,
     "noEmit": false,
-    "isolatedModules": false
+    "isolatedModules": false,
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "skipLibCheck": true
   },
   "include": ["server.mts"]
 }

@@ -1,1 +1,3 @@
-6. file sharing feature with file upload progress with drag and drop feature 
+
+1. Connect cloud data  (full supabase)
+2. change base prompt

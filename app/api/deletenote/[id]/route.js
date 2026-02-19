@@ -2,8 +2,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function DELETE(request, context) {
-  const { id } = await context.params; // ✅ await here
-  console.log("Deleting note with ID:", id);
+  const { id } = await context.params;
 
   if (!id) {
     return new Response(JSON.stringify({ error: "Invalid note ID" }), {

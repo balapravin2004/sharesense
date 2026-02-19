@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 export async function POST(req) {
   try {
     const { ids } = await req.json();
-    console.log("Incoming ids:", ids);
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json(
