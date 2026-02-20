@@ -1,0 +1,38 @@
+name: ShareBro CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+    environment: ShareBro-Prod
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_SERVICE_ROLE_KEY: ${{ secrets.NEXT_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: action/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisama generate
+
+      - name: Build app
+        run: npm run build
+
+      - name: Build Docker Image
+        run: docker build .

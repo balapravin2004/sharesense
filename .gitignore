@@ -8,6 +8,8 @@ pnpm-lock.yaml
 out
 venv/
 .venv
+.env
+.env.*
 
 # `duction files
 build
@@ -28,6 +30,7 @@ pnpm-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
+*.db
 
 # Misc
 *.tgz
