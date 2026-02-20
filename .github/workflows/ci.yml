@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Use Node 20
-        uses: action/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
