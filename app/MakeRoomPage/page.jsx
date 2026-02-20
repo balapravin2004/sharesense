@@ -9,7 +9,9 @@ import {
   setCurrentRoom,
 } from "../../store/chatSlice";
 
-import { ChatRoomForm, ActiveRooms, ChatWindow } from "../../components/index";
+import ChatRoomForm from "../../components/ChatRoomForm";
+import ActiveRooms from "../../components/ActiveRooms";
+import ChatWindow from "../../components/ChatWindow";
 
 export default function ChatPage() {
   const dispatch = useDispatch();
@@ -22,29 +24,71 @@ export default function ChatPage() {
 
   const handleJoinRoom = () => {
     if (!roomInput || !localName) return;
-    socket.emit("join-room", { room: roomInput, username: localName });
+    socket.emit("join-room", { room: roomInput, username: localName }, (res) =>
+      console.log("join ack", res)
+    );
     dispatch(setCurrentRoom(roomInput));
   };
 
   const handleLeaveRoom = () => {
     if (!currentRoom) return;
-    socket.emit("leave-room", { room: currentRoom });
+    socket.emit("leave-room", { room: currentRoom, username: localName });
     dispatch(setCurrentRoom(null));
   };
 
-  const handleSendMessage = (msg) => {
-    if (!msg.trim() || !currentRoom) return;
-    socket.emit("message", {
-      room: currentRoom,
-      sender: localName,
-      message: msg,
-    });
-    dispatch(
-      addMessage({
+  const handleSendMessage = (payload) => {
+    // payload can be { text } or { file: { filename, mime, buffer, size } }
+    if (!currentRoom) return;
+
+    if (payload.text && payload.text.trim()) {
+      socket.emit("message", {
         room: currentRoom,
-        message: { sender: localName, message: msg, isOwnMessage: true },
-      })
-    );
+        sender: localName,
+        message: payload.text,
+      });
+
+      dispatch(
+        addMessage({
+          room: currentRoom,
+          message: { sender: localName, message: payload.text },
+        })
+      );
+    }
+
+    if (payload.file) {
+      // emit binary file with metadata
+      socket.emit(
+        "file",
+        {
+          room: currentRoom,
+          sender: localName,
+          filename: payload.file.filename,
+          mime: payload.file.mime,
+          size: payload.file.size,
+          file: payload.file.buffer, // ArrayBuffer / Buffer => socket.io will transmit binary
+        },
+        (ack) => {
+          // optional ack
+        }
+      );
+
+      // locally add a "pending" message so sender sees it immediately
+      dispatch(
+        addMessage({
+          room: currentRoom,
+          message: {
+            sender: localName,
+            message: `Sent ${payload.file.filename}`,
+            file: {
+              filename: payload.file.filename,
+              mime: payload.file.mime,
+              size: payload.file.size,
+              outgoing: true,
+            },
+          },
+        })
+      );
+    }
   };
 
   useEffect(() => {
@@ -72,19 +116,41 @@ export default function ChatPage() {
 
     socket.on("active_rooms", (rooms) => dispatch(setActiveRooms(rooms)));
 
+    // receive file events
+    socket.on("file", (payload) => {
+      // payload: { room, sender, filename, mime, size, file } where file is binary (ArrayBuffer/Buffer)
+      // We will create an object URL in the UI component; store metadata in message and attach raw binary too
+      dispatch(
+        addMessage({
+          room: payload.room || currentRoom,
+          message: {
+            sender: payload.sender,
+            message: `File: ${payload.filename}`,
+            file: {
+              filename: payload.filename,
+              mime: payload.mime,
+              size: payload.size,
+              raw: payload.file, // may be ArrayBuffer or Buffer
+            },
+          },
+        })
+      );
+    });
+
     return () => {
       socket.off("message");
       socket.off("user_joined");
       socket.off("active_rooms");
+      socket.off("file");
     };
-  }, [currentRoom]);
+  }, [currentRoom, dispatch]);
 
   return (
-    <div className="w-full min-h-[90vh] flex flex-col md:flex-row p-4 md:p-6 bg-gray-50 gap-6">
+    <div className="w-full h-[90vh] flex flex-col md:flex-row p-4 md:p-6 bg-gray-50 gap-6">
       {!currentRoom ? (
         <>
           {/* Left Side: Join Form */}
-          <div className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto md:mx-0">
+          <div className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-lg shadow-lg md:max-w-md mx-auto md:mx-0 border border-none w-full">
             <h2 className="text-2xl font-bold text-center text-blue-600">
               Join a Chat Room
             </h2>
@@ -98,8 +164,8 @@ export default function ChatPage() {
           </div>
 
           {/* Right Side: Active Rooms */}
-          <div className="flex-1 flex flex-col gap-4 p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto md:mx-0">
-            <h3 className="text-xl font-semibold text-gray-700">
+          <div className="flex-1 flex flex-col gap-4 p-4 bg-white rounded-lg shadow-lg w-full max-h-[80vh] overflow-auto">
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
               Active Rooms ({activeRooms.length})
             </h3>
             <ActiveRooms rooms={activeRooms} />

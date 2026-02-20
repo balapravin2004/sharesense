@@ -1,13 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+// const initialState = {
+//   userName: "",
+//   currentRoom: null,
+//   messages: {}, // { roomName: [messages] }
+//   activeRooms: Array.from({ length: 40 }, (_, i) => ({
+//     room: `Room-${i + 1}`,
+//     users: Math.floor(Math.random() * 10) + 1, // random 1-10 users
+//   })),
+// };
+
 const initialState = {
   userName: "",
   currentRoom: null,
   messages: {}, // { roomName: [messages] }
-  activeRooms: Array.from({ length: 40 }, (_, i) => ({
-    room: `Room-${i + 1}`,
-    users: Math.floor(Math.random() * 10) + 1, // random 1-10 users
-  })),
+  activeRooms: [],
 };
 
 const chatSlice = createSlice({

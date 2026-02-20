@@ -1,23 +1,23 @@
 "use client";
 
 import React from "react";
-
+//adding comment here
 export default function ActiveRooms({ rooms }) {
   return (
-    <div className="mt-6  border border-none">
-      <h3 className="font-semibold text-gray-700">
-        Active Rooms ({rooms.length})
-      </h3>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 max-h-[50vh] overflow-auto">
+    <div className="mb-6 w-full h-full overflow-auto p-2 rounded-lg shadow-sm bg-white border">
+      {/* Responsive Card Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {rooms.map((r) => (
-          <li
+          <div
             key={r.room}
-            className="flex justify-between p-2 bg-blue-50 rounded-lg shadow-sm">
-            <span className="font-medium">{r.room}</span>
-            <span className="text-gray-500">{r.users} users</span>
-          </li>
+            className="flex flex-col justify-between p-4 bg-blue-50 rounded-lg shadow-sm hover:bg-blue-100 transition w-full">
+            <span className="font-semibold text-blue-700 text-lg">
+              {r.room}
+            </span>
+            <span className="text-gray-500 text-sm mt-1">Users: {r.users}</span>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
