@@ -35,7 +35,7 @@ export const getNavItems = (state, dispatch) => {
     },
     { label: "Home", icon: Home, route: "/" },
     { label: "All Notes", icon: FileText, route: "/AllNotesPage" },
-    // { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
+    { label: "Secure Share", icon: Lock, route: "/SecureSharePage" },
     { label: "Make Room", icon: UserPlus, route: "/MakeRoomPage" },
     { label: "Info", icon: Info, route: "/InfoPage" }, // <- updated
     { label: "Login", icon: LogIn, route: "/auth" },
