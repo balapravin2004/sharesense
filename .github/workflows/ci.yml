@@ -66,9 +66,14 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/sharebro:latest
-            docker stop sharebro || true
-            docker rm sharebro || true
+
+            docker stop sharebro_old || true
+            docker rm sharebro_old || true
+            
+            docker rename sharebro sharebro_old || true
+            
             docker run -d \
               -p 3000:3000 \
               --name sharebro \
@@ -76,3 +81,9 @@ jobs:
               -v sharebro_data:/data \
               --env-file .env \
               ${{ secrets.DOCKERHUB_USERNAME }}/sharebro:latest
+            
+            sleep 5
+            
+            docker logs sharebro --tail 20
+            
+            docker rm sharebro_old || true
