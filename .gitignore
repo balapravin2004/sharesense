@@ -10,6 +10,7 @@ venv/
 .venv
 .env
 .env.*
+sharebro-keypair.pem
 
 # `duction files
 build
