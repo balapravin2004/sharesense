@@ -27,7 +27,7 @@ dist/
 # Hardhat / Blockchain
 # =========================
 cache/
-artifacts/
+# artifacts/
 typechain/
 typechain-types/
 coverage/
