@@ -5,7 +5,6 @@ const FileUpload = ({ contract, account, provider }) => {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("No image selected");
 
-  // ---------- FILE PICK ----------
   const retrieveFile = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
@@ -15,18 +14,15 @@ const FileUpload = ({ contract, account, provider }) => {
     reader.onloadend = () => {
       setFile(selectedFile);
     };
-
     setFileName(selectedFile.name);
     e.preventDefault();
   };
 
-  // ---------- UPLOAD + BLOCKCHAIN ----------
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) return;
 
     try {
-      // 1️⃣ Upload to Pinata
       const formData = new FormData();
       formData.append("file", file);
 
@@ -35,19 +31,15 @@ const FileUpload = ({ contract, account, provider }) => {
         formData,
         {
           headers: {
-            pinata_api_key: "ENTER_YOUR_KEY",
-            pinata_secret_api_key: "ENTER_YOUR_SECRET",
+            pinata_api_key: "ed171ad155b6089658be",
+            pinata_secret_api_key: "0ce648a573bf17137255bf4db8f5642df18d4c8dc30c4c27ab67777477c3d503",
             "Content-Type": "multipart/form-data",
           },
-        },
+        }
       );
 
-      // 2️⃣ Create IPFS URI (BEST PRACTICE)
-      const ImgHash = `ipfs://${resFile.data.IpfsHash}`;
-
-      // 3️⃣ Write to blockchain using SIGNER
-      const signer = contract.connect(provider.getSigner());
-      await signer.add(account, ImgHash);
+      const ImgHash = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
+      await contract.add(account, ImgHash);
 
       alert("Successfully Image Uploaded");
       setFileName("No image selected");
@@ -58,7 +50,6 @@ const FileUpload = ({ contract, account, provider }) => {
     }
   };
 
-  // ---------- UI (UNCHANGED) ----------
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded-2xl shadow-md space-y-4">
       <h2 className="text-lg font-semibold text-gray-800">Upload Image</h2>
