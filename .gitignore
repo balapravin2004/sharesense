@@ -1,40 +1,59 @@
+# =========================
 # Dependencies
-node_modules
-/node_modules
+# =========================
+node_modules/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# Build output
-.next
-/.next
-out
+# =========================
+# Environment files
+# =========================
 .env
-.env
-
-# `duction files
-build
-dist
-
-# Local env files
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# =========================
+# Next.js
+# =========================
+.next/
+out/
+build/
+dist/
+
+# =========================
+# Hardhat / Blockchain
+# =========================
+cache/
+# artifacts/
+typechain/
+typechain-types/
+coverage/
+coverage.json
+
+# =========================
+# Prisma
+# =========================
+/app/generated/prisma/
+
+# =========================
 # Logs
+# =========================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# =========================
 # OS files
+# =========================
 .DS_Store
 Thumbs.db
 
+# =========================
 # Misc
+# =========================
 *.tgz
-
-/app/generated/prisma
-./notes.txt
 notes.txt
