@@ -10,7 +10,7 @@ export default function Page() {
   const [contract, setContract] = useState(null);
   const [provider, setProvider] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-
+//adding sometihng here 
   useEffect(() => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
 
