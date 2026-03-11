@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 export async function POST(req) {
   try {
     const body = await req.json();
-    console.log("Incoming payload:", body);
 
     const { content, mode: rawMode, userId, userName } = body;
 

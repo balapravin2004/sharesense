@@ -3,10 +3,10 @@ import next from "next";
 import { Server, Socket } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
-const hostname = process.env.HOSTNAME || "0.0.0.0";
 const port = parseInt(process.env.PORT || "3000", 10);
 
-const app = next({ dev, hostname, port });
+// ✅ Do NOT pass hostname/port here
+const app = next({ dev });
 const handle = app.getRequestHandler();
 
 interface ActiveRooms {
@@ -18,20 +18,18 @@ app.prepare().then(() => {
 
   const io = new Server(httpServer, {
     cors: {
-      origin: "*", // replace with your frontend URL in production
+      origin: "*",
       methods: ["GET", "POST"],
     },
   });
 
-  // Track rooms and users
   const activeRooms: ActiveRooms = {};
 
   io.on("connection", (socket: Socket) => {
-    console.log(`✅ User connected: ${socket.id}`);
+    socket.onAny((event, ...args) =>
+      console.log("📡 Event:", event, args)
+    );
 
-    socket.onAny((event, ...args) => console.log("📡 Event:", event, args));
-
-    // Join room
     socket.on(
       "join-room",
       (
@@ -43,22 +41,22 @@ app.prepare().then(() => {
         if (!activeRooms[room]) activeRooms[room] = new Set();
         activeRooms[room].add(socket.id);
 
-        // Notify room
         socket.to(room).emit("user_joined", username);
         socket.emit("user_joined", username);
 
-        // Emit updated active rooms
-        const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
-          room: r,
-          users: users.size,
-        }));
+        const roomsInfo = Object.entries(activeRooms).map(
+          ([r, users]) => ({
+            room: r,
+            users: users.size,
+          })
+        );
+
         io.emit("active_rooms", roomsInfo);
 
         if (ack) ack({ ok: true });
       }
     );
 
-    // Leave room
     socket.on(
       "leave-room",
       ({ room, username }: { room: string; username?: string }) => {
@@ -71,15 +69,17 @@ app.prepare().then(() => {
 
         if (username) socket.to(room).emit("user_left", username);
 
-        const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
-          room: r,
-          users: users.size,
-        }));
+        const roomsInfo = Object.entries(activeRooms).map(
+          ([r, users]) => ({
+            room: r,
+            users: users.size,
+          })
+        );
+
         io.emit("active_rooms", roomsInfo);
       }
     );
 
-    // Chat message
     socket.on(
       "message",
       ({
@@ -91,14 +91,31 @@ app.prepare().then(() => {
         sender: string;
         message: string;
       }) => {
-        io.to(room).emit("message", { sender, message });
+        io.to(room).emit("message", { room, sender, message });
       }
     );
 
-    // Disconnecting cleanup
+    socket.on(
+      "file",
+      (payload: {
+        room: string;
+        sender: string;
+        filename: string;
+        mime: string;
+        size: number;
+        file: any;
+      }) => {
+        try {
+          io.to(payload.room).emit("file", payload);
+        } catch (err) {
+          console.error("file handling error", err);
+        }
+      }
+    );
+
     socket.on("disconnecting", () => {
       for (const room of socket.rooms) {
-        if (room === socket.id) continue; // skip default room
+        if (room === socket.id) continue;
         if (activeRooms[room]) {
           activeRooms[room].delete(socket.id);
           if (activeRooms[room].size === 0) delete activeRooms[room];
@@ -106,18 +123,20 @@ app.prepare().then(() => {
       }
     });
 
-    // On disconnect
     socket.on("disconnect", () => {
-      const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
-        room: r,
-        users: users.size,
-      }));
+      const roomsInfo = Object.entries(activeRooms).map(
+        ([r, users]) => ({
+          room: r,
+          users: users.size,
+        })
+      );
       io.emit("active_rooms", roomsInfo);
       console.log(`❌ User disconnected: ${socket.id}`);
     });
   });
 
-  httpServer.listen(port, () =>
-    console.log(`🚀 Server running on http://${hostname}:${port}`)
-  );
+  // ✅ Explicitly bind to 0.0.0.0 for Docker
+  httpServer.listen(port, "0.0.0.0", () => {
+    console.log(`🚀 Server running on port ${port}`);
+  });
 });

@@ -30,13 +30,13 @@ const ShareModal = ({ isOpen, onClose, note }) => {
 
         <div className="flex justify-center gap-6">
           <WhatsappShareButton
-            url={`https://sharebhai.com/notes/${note.id}`}
+            url={`https://sharebro.com/notes/${note.id}`}
             title={note.content}>
             <FaWhatsapp className="text-green-600 w-10 h-10" />
           </WhatsappShareButton>
 
           <EmailShareButton
-            url={`https://sharebhai.com/notes/${note.id}`}
+            url={`https://sharebro.com/notes/${note.id}`}
             subject="Check this note"
             body={note.content}>
             <FaEnvelope className="text-blue-600 w-10 h-10" />

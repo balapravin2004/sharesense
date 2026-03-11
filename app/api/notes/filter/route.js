@@ -9,13 +9,11 @@ const prisma = new PrismaClient();
 export async function POST(req) {
   try {
     const { mode, userId } = await req.json();
-    console.log("Filter payload:", { mode, userId });
 
     let where = {};
 
     switch (mode) {
       case "general":
-        // Notes visible to everyone (guest)
         where = { isGlobal: false, authorId: null };
         break;
 
@@ -50,6 +48,7 @@ export async function POST(req) {
         break;
 
       default:
+        // Default to general notes
         where = { isGlobal: false, authorId: null };
     }
 

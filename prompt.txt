@@ -1,0 +1,363 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { socket } from "../../lib/socketClient";
+import {
+  addMessage,
+  setActiveRooms,
+  setCurrentRoom,
+} from "../../store/chatSlice";
+
+import { ChatRoomForm, ActiveRooms, ChatWindow } from "../../components/index";
+
+export default function ChatPage() {
+  const dispatch = useDispatch();
+  const { currentRoom, messages, activeRooms } = useSelector(
+    (state) => state.chat
+  );
+
+  const [localName, setLocalName] = useState("");
+  const [roomInput, setRoomInput] = useState("");
+
+  const handleJoinRoom = () => {
+    if (!roomInput || !localName) return;
+    socket.emit("join-room", { room: roomInput, username: localName });
+    dispatch(setCurrentRoom(roomInput));
+  };
+
+  const handleLeaveRoom = () => {
+    if (!currentRoom) return;
+    socket.emit("leave-room", { room: currentRoom });
+    dispatch(setCurrentRoom(null));
+  };
+
+  const handleSendMessage = (msg) => {
+    if (!msg.trim() || !currentRoom) return;
+    socket.emit("message", {
+      room: currentRoom,
+      sender: localName,
+      message: msg,
+    });
+  };
+
+  useEffect(() => {
+    socket.on("message", (data) => {
+      dispatch(
+        addMessage({
+          room: data.room || currentRoom,
+          message: { sender: data.sender, message: data.message },
+        })
+      );
+    });
+
+    socket.on("user_joined", (username) => {
+      dispatch(
+        addMessage({
+          room: currentRoom,
+          message: {
+            sender: "system",
+            message: `${username} joined`,
+            highlight: true,
+          },
+        })
+      );
+    });
+
+    socket.on("active_rooms", (rooms) => dispatch(setActiveRooms(rooms)));
+
+    return () => {
+      socket.off("message");
+      socket.off("user_joined");
+      socket.off("active_rooms");
+    };
+  }, [currentRoom]);
+
+  return (
+    <div className="w-full min-h-[90vh] flex flex-col md:flex-row p-4 md:p-6 bg-gray-50 gap-6">
+      {!currentRoom ? (
+        <>
+          {/* Left Side: Join Form */}
+          <div className="flex-1 flex flex-col gap-6 p-6 bg-white rounded-lg shadow-lg md:max-w-md mx-auto md:mx-0 border border-none w-full">
+            <h2 className="text-2xl font-bold text-center text-blue-600">
+              Join a Chat Room
+            </h2>
+            <ChatRoomForm
+              localName={localName}
+              setLocalName={setLocalName}
+              roomInput={roomInput}
+              setRoomInput={setRoomInput}
+              onJoin={handleJoinRoom}
+            />
+          </div>
+
+          {/* Right Side: Active Rooms */}
+          <div className="flex-1 flex flex-col gap-4 p-4 bg-white rounded-lg shadow-lg w-full max-h-[80vh] overflow-auto">
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              Active Rooms ({activeRooms.length})
+            </h3>
+            <ActiveRooms rooms={activeRooms} />
+          </div>
+        </>
+      ) : (
+        <ChatWindow
+          currentRoom={currentRoom}
+          messages={messages}
+          localName={localName}
+          onLeave={handleLeaveRoom}
+          onSendMessage={handleSendMessage}
+        />
+      )}
+    </div>
+  );
+}
+
+
+"use client";
+
+import React, { useRef, useEffect } from "react";
+import { ChatForm, ChatMessage } from "../components/index";
+
+export default function ChatWindow({
+  currentRoom,
+  messages,
+  localName,
+  onLeave,
+  onSendMessage,
+}) {
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () =>
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+
+  useEffect(scrollToBottom, [messages, currentRoom]);
+
+  return (
+    <div className="flex flex-col flex-1 bg-white rounded-lg shadow-lg overflow-hidden max-h-[80vh]">
+      {/* Header */}
+      <div className="flex justify-between items-center bg-blue-600 text-white px-4 py-3">
+        <h2 className="font-bold text-lg">Room: {currentRoom}</h2>
+        <button
+          onClick={onLeave}
+          className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded shadow">
+          Leave Room
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+        {messages[currentRoom]?.map((m, idx) => (
+          <div
+            key={idx}
+            className={`${
+              m.highlight
+                ? "bg-yellow-100 text-yellow-900 font-semibold text-center py-1 rounded"
+                : ""
+            }`}>
+            {!m.highlight ? (
+              <ChatMessage
+                sender={m.sender}
+                message={m.message}
+                isOwnMessage={m.sender === localName}
+              />
+            ) : (
+              <p>{m.message}</p>
+            )}
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Chat input */}
+      <div className="p-4 border-t bg-white">
+        <ChatForm onSendMessage={onSendMessage} />
+      </div>
+    </div>
+  );
+}
+
+
+"use client";
+
+import React from "react";
+
+export default function ChatRoomForm({
+  localName,
+  setLocalName,
+  roomInput,
+  setRoomInput,
+  onJoin,
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <input
+        type="text"
+        placeholder="Enter your name"
+        value={localName}
+        onChange={(e) => setLocalName(e.target.value)}
+        className="border px-3 py-2 rounded focus:ring focus:ring-blue-300 w-full"
+      />
+      <input
+        type="text"
+        placeholder="Room name"
+        value={roomInput}
+        onChange={(e) => setRoomInput(e.target.value)}
+        className="border px-3 py-2 rounded focus:ring focus:ring-blue-300 w-full"
+      />
+      <button
+        onClick={onJoin}
+        className="sidebar-gradient text-white font-semibold py-2 shadow w-full rounded-md">
+        Join Room
+      </button>
+    </div>
+  );
+}
+
+
+import { createServer } from "node:http";
+import next from "next";
+import { Server, Socket } from "socket.io";
+
+const dev = process.env.NODE_ENV !== "production";
+const hostname = process.env.HOSTNAME || "0.0.0.0";
+const port = parseInt(process.env.PORT || "3000", 10);
+
+const app = next({ dev, hostname, port });
+const handle = app.getRequestHandler();
+
+interface ActiveRooms {
+  [room: string]: Set<string>;
+}
+
+app.prepare().then(() => {
+  const httpServer = createServer((req, res) => handle(req, res));
+
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*", // replace with your frontend URL in production
+      methods: ["GET", "POST"],
+    },
+  });
+
+  // Track rooms and users
+  const activeRooms: ActiveRooms = {};
+
+  io.on("connection", (socket: Socket) => {
+    // console.log(`✅ User connected: ${socket.id}`);
+
+    socket.onAny((event, ...args) => console.log("📡 Event:", event, args));
+
+    // Join room
+    socket.on(
+      "join-room",
+      (
+        { room, username }: { room: string; username: string },
+        ack?: (response: { ok: boolean }) => void
+      ) => {
+        socket.join(room);
+
+        if (!activeRooms[room]) activeRooms[room] = new Set();
+        activeRooms[room].add(socket.id);
+
+        // Notify room
+        socket.to(room).emit("user_joined", username);
+        socket.emit("user_joined", username);
+
+        // Emit updated active rooms
+        const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
+          room: r,
+          users: users.size,
+        }));
+        io.emit("active_rooms", roomsInfo);
+
+        if (ack) ack({ ok: true });
+      }
+    );
+
+    // Leave room
+    socket.on(
+      "leave-room",
+      ({ room, username }: { room: string; username?: string }) => {
+        socket.leave(room);
+
+        if (activeRooms[room]) {
+          activeRooms[room].delete(socket.id);
+          if (activeRooms[room].size === 0) delete activeRooms[room];
+        }
+
+        if (username) socket.to(room).emit("user_left", username);
+
+        const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
+          room: r,
+          users: users.size,
+        }));
+        io.emit("active_rooms", roomsInfo);
+      }
+    );
+
+    // Chat message
+    socket.on(
+      "message",
+      ({
+        room,
+        sender,
+        message,
+      }: {
+        room: string;
+        sender: string;
+        message: string;
+      }) => {
+        io.to(room).emit("message", { sender, message });
+      }
+    );
+
+    // Disconnecting cleanup
+    socket.on("disconnecting", () => {
+      for (const room of socket.rooms) {
+        if (room === socket.id) continue; // skip default room
+        if (activeRooms[room]) {
+          activeRooms[room].delete(socket.id);
+          if (activeRooms[room].size === 0) delete activeRooms[room];
+        }
+      }
+    });
+
+    // On disconnect
+    socket.on("disconnect", () => {
+      const roomsInfo = Object.entries(activeRooms).map(([r, users]) => ({
+        room: r,
+        users: users.size,
+      }));
+      io.emit("active_rooms", roomsInfo);
+      console.log(`❌ User disconnected: ${socket.id}`);
+    });
+  });
+
+  httpServer.listen(port, () =>
+    console.log(`🚀 Server running on http://${hostname}:${port}`)
+  );
+});
+
+
+import { io } from "socket.io-client";
+
+const SERVER_URL =
+  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000";
+
+export const socket = io(SERVER_URL, {
+  transports: ["websocket"],
+  withCredentials: true,
+});
+
+socket.on("connect", () => console.log("✅ Connected:", socket.id));
+socket.on("connect_error", (err) => console.error("❌ Error:", err.message));
+socket.onAny((event, ...args) => console.log("📡 Event:", event, args));
+
+
+write all the code again but only for what is needed write for that code file
+new updates neeeded
+1. user can join room as it is happening now but also now the user can send any files
+2. make sure that the file can be now send on real time
+3. make sure that the files can be downloaded to the recivers side in the room
+4. Add Ui what is needed for that also 
+5. write the full code for that particular files
