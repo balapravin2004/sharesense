@@ -39,3 +39,6 @@ Thumbs.db
 /app/generated/prisma
 ./notes.txt
 notes.txt
+*.pem
+sharebro-keypair.pem
+Sharebro_Arch.drawio
