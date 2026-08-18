@@ -17,7 +17,7 @@ export default function NotesImages({ visible }) {
       const toastId = toast.loading("Fetching images...");
       setLoading(true);
       try {
-        const res = await axios.get("/api/notesimages");
+        const res = await axios.get("/api/allimages");
         setImages(res.data.images || []);
         toast.success("Images loaded", { id: toastId });
       } catch (error) {
@@ -95,10 +95,10 @@ export default function NotesImages({ visible }) {
 
                 {/* Image */}
                 <img
-                  src={img}
+                  src={img.url} // assuming the object has a `url` property from the API
                   alt={`Uploaded ${idx}`}
                   className="w-full h-40 object-cover"
-                  onClick={() => setSelectedImage(img)}
+                  onClick={() => setSelectedImage(img.url)}
                 />
               </div>
             ))}
@@ -108,7 +108,9 @@ export default function NotesImages({ visible }) {
 
       {/* Modal */}
       <ImageModal
-        imageUrl={selectedImage}
+        open={!!selectedImage} // modal opens when selectedImage is set
+        src={selectedImage} // pass the URL to src
+        alt="Selected image"
         onClose={() => setSelectedImage(null)}
       />
     </>

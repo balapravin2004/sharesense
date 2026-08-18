@@ -3,28 +3,39 @@
 import { useSelector, useDispatch } from "react-redux";
 import { usePathname } from "next/navigation";
 import NavList from "./NavList";
-import LogoutButton from "./LogoutButton";
-import { getNavItems } from "../store/uiSlice"; // Import the selector/helper function
+import { getNavItems } from "../store/uiSlice";
 
 export default function SidebarDesktop() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const state = useSelector((state) => state.ui);
 
-  // Get the nav items using the state and dispatch
   const navItems = getNavItems(state, dispatch);
 
   return (
     <div
-      className={`hidden md:flex h-screen text-white p-4 flex-col justify-between bg-transparent transition-all duration-300 ${
+      className={`hidden md:flex h-screen text-white p-4 flex-col bg-transparent transition-all duration-300 border-none ${
         state.collapsed ? "w-20" : "w-60"
       }`}>
-      <NavList
-        items={navItems}
-        pathname={pathname}
-        collapsed={state.collapsed}
-      />
-      <LogoutButton collapsed={state.collapsed} />
+      <div className="max-h-[50rem] h-full flex flex-col items-center w-full border-none">
+        {/* Nav items section */}
+        <div className="w-full">
+          <NavList
+            items={navItems}
+            pathname={pathname}
+            collapsed={state.collapsed}
+          />
+        </div>
+
+        {/* QR image placed directly below NavList */}
+        <div className="w-full mt-6 overflow-hidden border-none">
+          <img
+            src="/media/images/QRcode.png"
+            alt="QR Code"
+            className="w-full h-auto object-contain rounded-xl"
+          />
+        </div>
+      </div>
     </div>
   );
 }

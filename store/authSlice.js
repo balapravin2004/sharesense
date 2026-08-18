@@ -2,29 +2,37 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const saveAuthData = (id, token) => {
+import { resetFilterMode } from "./notesSlice";
+
+import { useDispatch } from "react-redux";
+
+// Save full user and token
+const saveAuthData = (user, token) => {
   if (typeof window !== "undefined") {
-    localStorage.setItem("authId", id);
+    localStorage.setItem("authUser", JSON.stringify(user));
     localStorage.setItem("authToken", token);
   }
 };
 
+// Remove user and token
 const removeAuthData = () => {
   if (typeof window !== "undefined") {
-    localStorage.removeItem("authId");
+    localStorage.removeItem("authUser");
     localStorage.removeItem("authToken");
-    console.log("Token and ID removed on logout");
   }
 };
 
+// Get saved user and token
 const getAuthData = () => {
   if (typeof window !== "undefined") {
+    const storedUser = localStorage.getItem("authUser");
+    const storedToken = localStorage.getItem("authToken");
     return {
-      id: localStorage.getItem("authId"),
-      token: localStorage.getItem("authToken"),
+      user: storedUser ? JSON.parse(storedUser) : null,
+      token: storedToken || null,
     };
   }
-  return { id: null, token: null };
+  return { user: null, token: null };
 };
 
 // Signup action
@@ -57,17 +65,21 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// Logout action
-export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
-  toast.success("Logged out successfully!");
-  removeAuthData();
-  return null;
-});
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { dispatch }) => {
+    toast.success("Logged out successfully!");
+    removeAuthData();
+    dispatch(resetFilterMode());
+
+    return null;
+  }
+);
 
 // Initial state
-const { id, token } = getAuthData();
+const { user, token } = getAuthData();
 const initialState = {
-  user: id ? { id } : null, // Only id is saved persistently; name and email are lost on refresh unless refetched
+  user: user,
   token: token,
   activeTab: "signup",
   loading: false,
@@ -93,13 +105,12 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        saveAuthData(action.payload.user.id, action.payload.token);
+        saveAuthData(action.payload.user, action.payload.token);
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
       // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
@@ -109,7 +120,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        saveAuthData(action.payload.user.id, action.payload.token);
+        saveAuthData(action.payload.user, action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -124,6 +135,7 @@ const authSlice = createSlice({
       });
   },
 });
+
 export const selectUser = (state) => state.auth.user;
 export const { setActiveTab } = authSlice.actions;
 export default authSlice.reducer;

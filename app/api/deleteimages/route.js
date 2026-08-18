@@ -1,21 +1,14 @@
-// app/api/deleteimages/route.js
+// pages/api/deleteimages/route.js
 import { NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-// Cloudinary config
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import prisma from "../../../lib/prisma";
+import { getUserFromAuthHeader } from "../../../lib/auth";
+import { supabase } from "../../../lib/supabase";
 
 export async function POST(req) {
   try {
-    const { images } = await req.json();
+    const userPayload = getUserFromAuthHeader(req);
 
+    const { images } = await req.json(); // expecting an array of image objects from frontend
     if (!images || !Array.isArray(images) || images.length === 0) {
       return NextResponse.json(
         { error: "No images provided" },
@@ -23,36 +16,40 @@ export async function POST(req) {
       );
     }
 
-    let deletedCount = 0;
+    const deletedImages = [];
 
-    for (const imgUrl of images) {
-      try {
-        // 1. Extract public_id from URL
-        // Example: https://res.cloudinary.com/demo/image/upload/v12345/folder/abc123.jpg
-        const parts = imgUrl.split("/");
-        const fileWithExt = parts.pop(); // abc123.jpg
-        const folderPath = parts.slice(7).join("/"); // folder/... after "upload/"
-        const publicId = `${folderPath}/${fileWithExt.split(".")[0]}`;
+    for (const img of images) {
+      // img should have at least a `publicId` and `id`
+      const { publicId, id } = img;
 
-        // 2. Delete from Cloudinary
-        await cloudinary.uploader.destroy(publicId);
+      if (!publicId || !id) continue;
 
-        // 3. Delete from Prisma DB
-        await prisma.file.deleteMany({
-          where: { url: imgUrl },
-        });
+      // Delete from Supabase Storage
+      const { error: supaError } = await supabase.storage
+        .from("uploads")
+        .remove([publicId]);
 
-        deletedCount++;
-      } catch (err) {
-        console.error("Error deleting:", imgUrl, err);
+      if (supaError) {
+        console.error(`Supabase delete error for ${publicId}:`, supaError);
+        continue; // skip to next
       }
+
+      // Delete from Prisma DB
+      await prisma.file.delete({
+        where: { id },
+      });
+
+      deletedImages.push(id);
     }
 
-    return NextResponse.json({ success: true, deleted: deletedCount });
-  } catch (error) {
-    console.error("Delete API error:", error);
+    return NextResponse.json({
+      success: true,
+      deleted: deletedImages,
+    });
+  } catch (err) {
+    console.error("Delete images error:", err);
     return NextResponse.json(
-      { error: "Failed to delete images" },
+      { error: err.message || "Failed to delete images" },
       { status: 500 }
     );
   }

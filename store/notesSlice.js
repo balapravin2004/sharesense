@@ -8,7 +8,15 @@ export const fetchAllNotes = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     const toastId = toast.loading("Fetching notes...");
     try {
-      const res = await axios.get("/api/allnotes");
+      const res = await fetch("/api/notes/filter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "general",
+          userId: null,
+          query: null,
+        }),
+      });
       const data = Array.isArray(res.data) ? res.data : res.data?.notes ?? [];
       toast.success("Notes loaded", { id: toastId });
       return data;
@@ -50,13 +58,11 @@ const notesSlice = createSlice({
     deletingId: null,
     query: "",
     showImages: false,
-    filterMode: "both", // general, user, or both
+    filterMode: "general", // general, user, or both
   },
   reducers: {
     setQuery: (state, action) => {
       console.clear();
-      console.log("action.payload", action.payload);
-
       state.query = action.payload;
       const q = state.query.trim().toLowerCase();
 
@@ -73,7 +79,6 @@ const notesSlice = createSlice({
       }
 
       state.filteredNotes = temp;
-      console.log("filteredNotes", state.filteredNotes);
     },
 
     toggleShowImages: (state) => {
@@ -111,13 +116,27 @@ const notesSlice = createSlice({
     setFilteredNotes: (state, action) => {
       // Set all notes and baseFilteredNotes
       state.notes = action.payload;
-      state.baseFilteredNotes = action.payload.filter((note) => {
-        if (state.filterMode === "general") return note.isGlobal;
-        if (state.filterMode === "user") return !note.isGlobal;
-        return true;
-      });
+      state.baseFilteredNotes = action.payload;
 
       // Apply query on top
+      const q = state.query.trim().toLowerCase();
+      let temp = [...state.baseFilteredNotes];
+      if (q) {
+        temp = temp.filter((note) =>
+          (note.content || "")
+            .replace(/<[^>]*>/g, "")
+            .toLowerCase()
+            .includes(q)
+        );
+      }
+      state.filteredNotes = temp;
+    },
+
+    resetFilterMode: (state) => {
+      state.filterMode = "general";
+
+      state.baseFilteredNotes = state.notes.filter((note) => note.isGlobal);
+
       const q = state.query.trim().toLowerCase();
       let temp = [...state.baseFilteredNotes];
       if (q) {
@@ -141,7 +160,8 @@ const notesSlice = createSlice({
 
         // Initialize baseFilteredNotes based on filterMode
         state.baseFilteredNotes = state.notes.filter((note) => {
-          if (state.filterMode === "general") return note.isGlobal;
+
+          if (state.filterMode === "general") return note;
           if (state.filterMode === "user") return !note.isGlobal;
           return true;
         });
@@ -189,6 +209,7 @@ export const {
   setDeletingId,
   setFilterMode,
   setFilteredNotes,
+  resetFilterMode,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
